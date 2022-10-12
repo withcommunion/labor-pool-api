@@ -1,0 +1,46 @@
+{
+  "name": "communion-labor-pool-api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "lint": "eslint src/",
+    "build": "tsc",
+    "test": "LOG_LEVEL=verbose jest",
+    "test:watch": "LOG_LEVEL=verbose jest --watch",
+    "prepare": "husky install",
+    "deploy:dev": "sls deploy --stage dev --aws-profile communion --verbose --aws-s3-accelerate",
+    "deploy:prod": "sls deploy --stage prod --aws-profile communion --verbose --aws-s3-accelerate",
+    "deploy-ci:dev": "sls deploy --stage dev --verbose --aws-s3-accelerate",
+    "deploy-ci:prod": "sls deploy --stage prod --verbose --aws-s3-accelerate"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.163.0",
+    "@aws-sdk/client-lambda": "^3.169.0",
+    "@aws-sdk/client-s3": "^3.171.0",
+    "@aws-sdk/lib-dynamodb": "^3.172.0",
+    "axios": "^0.27.2",
+    "lambda-log": "^3.1.0",
+    "nanoid": "^4.0.0",
+    "twilio": "^3.80.1",
+    "winston": "^3.8.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.101",
+    "@types/jest": "^28.1.7",
+    "@types/node": "18.7.18",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.33.1",
+    "eslint": "8.23.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "husky": "^8.0.1",
+    "jest": "^28.1.3",
+    "prettier": "^2.7.1",
+    "serverless": "^3.21.0",
+    "serverless-bundle": "^5.5.0",
+    "serverless-prune-plugin": "^2.0.1",
+    "ts-jest": "^28.0.8",
+    "ts-node": "^10.9.1",
+    "typescript": "4.8.3"
+  }
+}

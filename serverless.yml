@@ -1,0 +1,129 @@
+service: labor-pool
+configValidationMode: error
+
+provider:
+  name: aws
+  deploymentMethod: direct
+  runtime: nodejs14.x
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  stackName: ${sls:stage}-${self:service}
+  apiName: ${sls:stage}-${self:service}
+  memorySize: 512
+  deploymentPrefix: serverless
+  versionFunctions: true
+  logRetentionInDays: 30
+  # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+  # TODO View docs - we will want to make it only accept from our domain
+  httpApi:
+    cors: true
+    authorizers:
+      cognitoJwtAuthorizer-dev:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_RonOZGam5
+        audience:
+          # TODO: Figure out the implications of this, is clientId proper?
+          - 7cnfbbjqhiajpqukk83gcu9hr1
+      cognitoJwtAuthorizer-prod:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_SeeaUyuuH
+        audience:
+          # TODO: Figure out the implications of this, is clientId proper?
+          - 795lg5ui539om7sspm4sej0q99
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 'lambda:InvokeFunction'
+          Resource:
+            - '*'
+        - Effect: 'Allow'
+          Action:
+            - 'dynamodb:*'
+          Resource:
+            - Fn::GetAtt: [usersTable, Arn]
+
+  environment:
+    STAGE: ${sls:stage}
+    LOG_LEVEL: verbose
+
+plugins:
+  - serverless-bundle
+  - serverless-prune-plugin
+
+custom:
+  prune:
+    automatic: true
+    number: 5
+  bundle:
+    packager: yarn
+
+functions:
+  getSelf:
+    name: ${self:service}-getSelf-${sls:stage}
+    handler: src/endpoints/api-get-self.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: GET
+          path: /user/{id}
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
+#   postConfirmationCreateUserWallet:
+#     name: postConfirmationCreateUserWallet-${sls:stage}
+#     handler: src/cognitoTriggers/post-confirmation-create-user-wallet.handler
+#     timeout: 5
+# events:
+#   - cognitoUserPool:
+#       pool: labor-pool-users-demo-${sls:stage}
+#       trigger: PostConfirmation
+#       existing: true
+
+resources:
+  Resources:
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-usersTable-${sls:stage}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        SSESpecification:
+          SSEEnabled: true
+        # https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_StreamSpecification.html
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+    cognitoLaborPoolUsersDemo:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:service}-users-${sls:stage}
+        UsernameAttributes:
+          - email
+        EmailConfiguration:
+          EmailSendingAccount: COGNITO_DEFAULT
+        AutoVerifiedAttributes:
+          - email
+        VerificationMessageTemplate:
+          DefaultEmailOption: CONFIRM_WITH_CODE
+        AccountRecoverySetting:
+          RecoveryMechanisms:
+            - Name: verified_email
+              Priority: 1
+        Schema:
+          - AttributeDataType: 'String'
+            Name: 'family_name'
+            Mutable: true
+            Required: true
+          - AttributeDataType: 'String'
+            Name: 'given_name'
+            Mutable: true
+            Required: true
+        UsernameConfiguration:
+          CaseSensitive: false

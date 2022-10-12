@@ -1,5 +1,6 @@
 # build output
 build
+build/
 dist
 target
 .serverless
@@ -8,6 +9,7 @@ target
 
 # dependencies
 node_modules
+node_modules/
 package-lock.json
 yarn.lock
 !/yarn.lock
