@@ -72,10 +72,10 @@ functions:
           path: /user/{id}
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
-#   postConfirmationCreateUserWallet:
-#     name: postConfirmationCreateUserWallet-${sls:stage}
-#     handler: src/cognitoTriggers/post-confirmation-create-user-wallet.handler
-#     timeout: 5
+  postConfirmCreateUser:
+    name: postConfirmCreateUser-${sls:stage}
+    handler: src/cognitoTriggers/post-confirm-create-user.handler
+    timeout: 5
 # events:
 #   - cognitoUserPool:
 #       pool: labor-pool-users-demo-${sls:stage}
