@@ -76,11 +76,11 @@ functions:
     name: postConfirmCreateUser-${sls:stage}
     handler: src/cognitoTriggers/post-confirm-create-user.handler
     timeout: 5
-# events:
-#   - cognitoUserPool:
-#       pool: labor-pool-users-demo-${sls:stage}
-#       trigger: PostConfirmation
-#       existing: true
+    events:
+      - cognitoUserPool:
+          pool: ${self:service}-users-${sls:stage}
+          trigger: PostConfirmation
+          existing: true
 
 resources:
   Resources:
