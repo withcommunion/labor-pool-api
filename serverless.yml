@@ -66,7 +66,7 @@ custom:
 
 functions:
   getUserById:
-    name: ${self:service}-getSelf-${sls:stage}
+    name: ${self:service}-getUserById-${sls:stage}
     handler: src/endpoints/api-get-user-by-id.handler
     events:
       # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
