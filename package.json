@@ -11,7 +11,8 @@
     "deploy:dev": "sls deploy --stage dev --aws-profile communion --verbose --aws-s3-accelerate",
     "deploy:prod": "sls deploy --stage prod --aws-profile communion --verbose --aws-s3-accelerate",
     "deploy-ci:dev": "sls deploy --stage dev --verbose --aws-s3-accelerate",
-    "deploy-ci:prod": "sls deploy --stage prod --verbose --aws-s3-accelerate"
+    "deploy-ci:prod": "sls deploy --stage prod --verbose --aws-s3-accelerate",
+    "invoke:postConfirmCreateUser": "NODE_ENV=local serverless invoke local --function postConfirmCreateUser --stage dev --path ./invokeLocalEvents/postConfirmationCognitoEvent.json -e LOG_LEVEL=verbose"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.163.0",
@@ -19,6 +20,7 @@
     "@aws-sdk/client-s3": "^3.171.0",
     "@aws-sdk/lib-dynamodb": "^3.172.0",
     "axios": "^0.27.2",
+    "dynamoose": "^3.1.0",
     "lambda-log": "^3.1.0",
     "nanoid": "^4.0.0",
     "twilio": "^3.80.1",
