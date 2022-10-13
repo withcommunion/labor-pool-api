@@ -56,14 +56,19 @@ export function setDefaultLoggerMetaForApi(
   event: APIGatewayProxyEventV2WithJWTAuthorizer,
   logger: winston.Logger
 ) {
-  const claims = event.requestContext.authorizer.jwt.claims;
-  // For some reason it can go through in two seperate ways
-  const requestUserId =
-    (claims.username as string) || (claims['cognito:username'] as string);
-  logger.defaultMeta = {
-    _requestId: event.requestContext.requestId,
-    userId: requestUserId,
-  };
+  try {
+    const claims = event.requestContext.authorizer.jwt.claims || {};
+    // For some reason it can go through in two seperate ways
+    const requestUserId =
+      (claims.username as string) || (claims['cognito:username'] as string);
+    logger.defaultMeta = {
+      _requestId: event.requestContext.requestId,
+      userId: requestUserId,
+    };
+  } catch (error) {
+    console.log('Failed to init logger', error);
+    return;
+  }
 }
 
 export default logger;
