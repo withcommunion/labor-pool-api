@@ -4,7 +4,7 @@ import logger, {
   setDefaultLoggerMetaForApi,
 } from '../util/winston-logger-util';
 
-import { User } from 'src/util/dynamo-user';
+import { getUserById } from 'src/util/dynamo-user';
 
 export const handler = async (
   event: APIGatewayProxyEventV2WithJWTAuthorizer
@@ -26,7 +26,8 @@ export const handler = async (
     const userIdToFetch = event.pathParameters?.id || requestingUserId;
 
     logger.verbose('Fetching user', { values: { userId: userIdToFetch } });
-    const user = await User.get(userIdToFetch);
+    const user = await getUserById(userIdToFetch);
+    logger.info('Received User', { values: { user } });
     /**
      * TODO:
      * We obviously want to put safeguards here
@@ -42,8 +43,6 @@ export const handler = async (
       );
       return generateReturn(404, { message: 'User not found' });
     }
-
-    logger.info('Received user', { values: user });
 
     const returnValue = generateReturn(200, {
       ...user,

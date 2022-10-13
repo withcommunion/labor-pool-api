@@ -44,6 +44,15 @@ const schema = new dynamoose.Schema(
 
 export const User = dynamoose.model<IUser>('labor-pool-usersTable-dev', schema);
 
+export async function getUserById(id: string) {
+  try {
+    return User.get(id);
+  } catch (error) {
+    console.log('Failed to getUserById', error);
+    return null;
+  }
+}
+
 /**
     // @ts-expect-error its ok
     await user.update({ id: userId }, { $ADD: { shiftHistory: ['asdf3'] } });
