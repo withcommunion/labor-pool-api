@@ -17,12 +17,13 @@ export const handler = async (
       values: { authorizer: event.requestContext.authorizer },
     });
 
-    const claims = event.requestContext.authorizer.jwt.claims;
+    const claims = event.requestContext.authorizer?.jwt?.claims;
     // For some reason it can come through in two seperate ways
     const requestingUserId =
-      (claims.username as string) || (claims['cognito:username'] as string);
+      claims &&
+      ((claims.username as string) || (claims['cognito:username'] as string));
 
-    const userIdToFetch = event.pathParameters?.userId || requestingUserId;
+    const userIdToFetch = event.pathParameters?.id || requestingUserId;
 
     logger.verbose('Fetching user', { values: { userId: userIdToFetch } });
     const user = await User.get(userIdToFetch);
@@ -54,6 +55,7 @@ export const handler = async (
     logger.error('Failed to get User', {
       values: { error },
     });
+    console.error('Failed to get User', error);
     return generateReturn(500, {
       message: 'Something went wrong trying to fetch User',
       error: error,

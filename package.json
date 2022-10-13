@@ -40,6 +40,7 @@
     "prettier": "^2.7.1",
     "serverless": "^3.21.0",
     "serverless-bundle": "^5.5.0",
+    "serverless-offline": "^11.1.2",
     "serverless-prune-plugin": "^2.0.1",
     "ts-jest": "^28.0.8",
     "ts-node": "^10.9.1",

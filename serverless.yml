@@ -53,6 +53,7 @@ provider:
 plugins:
   - serverless-bundle
   - serverless-prune-plugin
+  - serverless-offline
 
 custom:
   prune:
@@ -60,6 +61,8 @@ custom:
     number: 5
   bundle:
     packager: yarn
+  serverless-offline:
+    useChildProcesses: true
 
 functions:
   getUserById:
