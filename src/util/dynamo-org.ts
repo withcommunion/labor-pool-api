@@ -46,7 +46,8 @@ export const Org = dynamoose.model<IOrg>('labor-pool-orgsTable-dev', schema);
 
 export async function getOrgById(id: string) {
   try {
-    return Org.get(id);
+    const org = await Org.get(id);
+    return org;
   } catch (error) {
     console.log('Failed to getOrgById', error);
     return null;
@@ -59,9 +60,38 @@ export async function createOrg(org: {
   primaryMembers: string[];
 }) {
   try {
-    return Org.create(org);
+    const savedOrg = await Org.create(org);
+    return savedOrg;
   } catch (error) {
     console.log('Failed to createOrg', error);
+    return null;
+  }
+}
+
+export async function addMemberToOrg(orgId: string, userId: string) {
+  try {
+    const updatedOrg = await Org.update(
+      { id: orgId },
+      // @ts-expect-error this is a dynamoose TS bug
+      { $ADD: { primaryMembers: [userId] } }
+    );
+    return updatedOrg;
+  } catch (error) {
+    console.log('Failed to addMemberToOrg', error);
+    return null;
+  }
+}
+
+export async function addScheduleToOrg(orgId: string, scheduleId: string) {
+  try {
+    const updatedOrg = await Org.update(
+      { id: orgId },
+      // @ts-expect-error this is a dynamoose TS bug
+      { $ADD: { schedules: [scheduleId] } }
+    );
+    return updatedOrg;
+  } catch (error) {
+    console.log('Failed to addScheduleToOrg', error);
     return null;
   }
 }
