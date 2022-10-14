@@ -103,7 +103,16 @@ export async function addOrgToUser(userId: string, orgId: string) {
   }
 }
 
-/**
-    // @ts-expect-error its ok
-    await user.update({ id: userId }, { $ADD: { shiftHistory: ['asdf3'] } });
-    */
+export async function addShiftToUser(userId: string, shiftId: string) {
+  try {
+    const updatedUser = await User.update(
+      { id: userId },
+      // @ts-expect-error this is a dynamoose TS bug
+      { $ADD: { shiftHistory: [shiftId] } }
+    );
+    return updatedUser;
+  } catch (error) {
+    console.log('Failed to addShiftToUser', error);
+    return null;
+  }
+}

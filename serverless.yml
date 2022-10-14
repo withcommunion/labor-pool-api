@@ -120,6 +120,16 @@ functions:
           path: /org/{id}
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
+  postShift:
+    name: ${self:service}-postShift-${sls:stage}
+    handler: src/endpoints/api-post-shift.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: POST
+          path: /shift
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
   postConfirmCreateUser:
     name: postConfirmCreateUser-${sls:stage}
     handler: src/cognitoTriggers/post-confirm-create-user.handler
@@ -152,6 +162,22 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:service}-orgsTable-${sls:stage}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        SSESpecification:
+          SSEEnabled: true
+        # https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_StreamSpecification.html
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+    shiftsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-shiftsTable-${sls:stage}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
