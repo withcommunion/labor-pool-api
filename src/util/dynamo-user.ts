@@ -42,7 +42,11 @@ const schema = new dynamoose.Schema(
   }
 );
 
-export const User = dynamoose.model<IUser>('labor-pool-usersTable-dev', schema);
+const tableStage = process.env.STAGE === 'prod' ? 'prod' : 'dev';
+export const User = dynamoose.model<IUser>(
+  `labor-pool-usersTable-${tableStage}`,
+  schema
+);
 
 export async function getUserById(id: string) {
   try {

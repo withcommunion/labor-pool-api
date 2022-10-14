@@ -42,7 +42,11 @@ const schema = new dynamoose.Schema(
   }
 );
 
-export const Org = dynamoose.model<IOrg>('labor-pool-orgsTable-dev', schema);
+const tableStage = process.env.STAGE === 'prod' ? 'prod' : 'dev';
+export const Org = dynamoose.model<IOrg>(
+  `labor-pool-orgsTable-${tableStage}`,
+  schema
+);
 
 export async function getOrgById(id: string) {
   try {
