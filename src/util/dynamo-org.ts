@@ -22,16 +22,19 @@ const schema = new dynamoose.Schema(
     id: String,
     name: String,
     primaryMembers: {
-      type: Set,
+      type: Array,
       schema: [String],
+      default: [],
     },
     friends: {
-      type: Set,
+      type: Array,
       schema: [String],
+      default: [],
     },
     schedules: {
-      type: Set,
+      type: Array,
       schema: [String],
+      default: [],
     },
   },
   {
@@ -50,7 +53,7 @@ export const Org = dynamoose.model<IOrg>(
 
 export async function getOrgById(id: string) {
   try {
-    const org = await Org.get(id);
+    const org = await Org.get(id, {});
     return org;
   } catch (error) {
     console.log('Failed to getOrgById', error);

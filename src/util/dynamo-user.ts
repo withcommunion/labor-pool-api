@@ -27,8 +27,9 @@ const schema = new dynamoose.Schema(
     lastName: String,
     primaryOrgId: String,
     shiftHistory: {
-      type: Set,
+      type: Array,
       schema: [String],
+      default: [],
     },
     phoneNumber: String,
     email: String,
