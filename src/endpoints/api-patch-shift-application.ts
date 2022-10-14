@@ -5,11 +5,11 @@ import logger, {
 } from '../util/winston-logger-util';
 
 import { getUserById, addShiftToUser } from 'src/util/dynamo-user';
-import { applyUserToShift, getShiftById } from 'src/util/dynamo-shift';
+import { applyUserToShift, getShiftById, IShift } from 'src/util/dynamo-shift';
 
 interface ExpectedPatchBody {
   memberId: string;
-  status: string;
+  status: IShift['status'];
 }
 
 export const handler = async (
@@ -31,6 +31,7 @@ export const handler = async (
         message: 'Failed to parse memberId from body',
         body: event.body,
         requiredFields: ['memberId', 'status'],
+        availableStatuses: "'open' | 'applied' | 'filled' | 'expired'",
       });
     }
 
