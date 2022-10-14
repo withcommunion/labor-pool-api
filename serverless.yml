@@ -50,6 +50,11 @@ provider:
             - 'dynamodb:*'
           Resource:
             - Fn::GetAtt: [orgsTable, Arn]
+        - Effect: 'Allow'
+          Action:
+            - 'dynamodb:*'
+          Resource:
+            - Fn::GetAtt: [shiftsTable, Arn]
 
   environment:
     STAGE: ${sls:stage}
