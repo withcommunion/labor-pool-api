@@ -12,7 +12,7 @@ export interface IShift extends Item {
   id: string;
   name: string;
   orgId: string;
-  status: string;
+  status: 'open' | 'applied' | 'filled' | 'expired';
   description: string;
   assignedTo: string;
   beginDate: string;
@@ -26,7 +26,10 @@ const schema = new dynamoose.Schema(
     id: String,
     name: String,
     orgId: String,
-    status: String,
+    status: {
+      type: String,
+      default: 'open',
+    },
     description: String,
     assignedTo: String,
     beginDate: String,
@@ -73,7 +76,7 @@ export async function createShift(shift: {
   description: string;
   beginDate: string;
   endDate: string;
-  status: string;
+  status: IShift['status'];
   assignedTo: string;
 }) {
   try {
@@ -101,13 +104,13 @@ export async function addUserToShift(shiftId: string, userId: string) {
 export async function applyUserToShift(
   shiftId: string,
   userId: string,
-  newStatus: string
+  status: IShift['status']
 ) {
   try {
     const updatedShift = await Shift.update({
       id: shiftId,
       assignedTo: userId,
-      status: newStatus,
+      status: status,
     });
     return updatedShift;
   } catch (error) {
