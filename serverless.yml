@@ -100,6 +100,16 @@ functions:
           path: /org/{id}/friend
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
+  postOrgMember:
+    name: ${self:service}-postOrgMember-${sls:stage}
+    handler: src/endpoints/api-post-org-member.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: POST
+          path: /org/{id}/member
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
   getOrgById:
     name: ${self:service}-getOrgById-${sls:stage}
     handler: src/endpoints/api-get-org-by-id.handler
