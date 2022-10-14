@@ -97,3 +97,21 @@ export async function addUserToShift(shiftId: string, userId: string) {
     return null;
   }
 }
+
+export async function applyUserToShift(
+  shiftId: string,
+  userId: string,
+  newStatus: string
+) {
+  try {
+    const updatedShift = await Shift.update({
+      id: shiftId,
+      assignedTo: userId,
+      status: newStatus,
+    });
+    return updatedShift;
+  } catch (error) {
+    console.log('Failed to applyUserToShift', error);
+    return null;
+  }
+}
