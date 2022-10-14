@@ -46,12 +46,12 @@ export const handler = async (
 
     return returnValue;
   } catch (error) {
-    logger.error('Failed to get Org', {
+    logger.error('Failed to get shifts for org', {
       values: { error },
     });
-    console.error('Failed to get org', error);
+    console.error('Failed to get shifts for org', error);
     return generateReturn(500, {
-      message: 'Something went wrong trying to fetch the Org',
+      message: 'Something went wrong trying to fetch the shifts for org',
       error: error,
     });
   }
