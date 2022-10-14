@@ -52,13 +52,8 @@ export const Org = dynamoose.model<IOrg>(
 );
 
 export async function getOrgById(id: string) {
-  // const ddb = dynamoose.aws.converter(); // custom object set, or object with `@aws-sdk/util-dynamodb` default methods
   try {
     const org = await Org.get(id, {});
-    console.log('----');
-    console.log(org);
-    console.log('----');
-
     return org;
   } catch (error) {
     console.log('Failed to getOrgById', error);
