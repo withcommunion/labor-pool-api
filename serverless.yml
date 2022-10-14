@@ -90,6 +90,16 @@ functions:
           path: /org
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
+  getOrgById:
+    name: ${self:service}-getOrgById-${sls:stage}
+    handler: src/endpoints/api-get-org-by-id.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: GET
+          path: /org/{id}
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
   postConfirmCreateUser:
     name: postConfirmCreateUser-${sls:stage}
     handler: src/cognitoTriggers/post-confirm-create-user.handler
