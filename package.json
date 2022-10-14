@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "lint": "eslint src/",
+    "dev": "LOG_LEVEL=verbose sls offline start --noAuth",
     "build": "tsc",
     "test": "LOG_LEVEL=verbose jest",
     "test:watch": "LOG_LEVEL=verbose jest --watch",
