@@ -6,7 +6,7 @@ import type {
 
 import logger from '../util/winston-logger-util';
 
-import { User } from '../util/dynamo-user';
+import { createUser, User } from '../util/dynamo-user';
 
 export const handler = async (
   event: PostConfirmationTriggerEvent | PreSignUpAdminCreateUserTriggerEvent,
@@ -38,7 +38,8 @@ export const handler = async (
       // Nothing to do here, move on
     }
 
-    await User.create({
+    logger.verbose('Creating user in DB', { values: { userId } });
+    const user = await createUser({
       id: userId,
       firstName: userAttributes['given_name'],
       lastName: userAttributes['family_name'],
@@ -47,6 +48,7 @@ export const handler = async (
       allowSms: Boolean(userAttributes['phone_number']),
       primaryOrgId: '',
     });
+    logger.info('Created user in DB', { values: { user } });
 
     return event;
   } catch (error) {

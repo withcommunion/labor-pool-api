@@ -46,9 +46,29 @@ export const User = dynamoose.model<IUser>('labor-pool-usersTable-dev', schema);
 
 export async function getUserById(id: string) {
   try {
-    return User.get(id);
+    const user = await User.get(id);
+    return user;
   } catch (error) {
     console.log('Failed to getUserById', error);
+    return null;
+  }
+}
+
+export async function createUser(user: {
+  id: string;
+  firstName: string;
+  lastName: string;
+  primaryOrgId: string;
+  phoneNumber: string;
+  allowSms: boolean;
+  email: string;
+  shiftHistory?: string[];
+}) {
+  try {
+    const newUser = await User.create(user);
+    return newUser;
+  } catch (error) {
+    console.log('Failed to createUser', error);
     return null;
   }
 }
