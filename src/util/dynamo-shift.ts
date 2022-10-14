@@ -57,6 +57,16 @@ export async function getShiftById(id: string) {
   }
 }
 
+export async function getOrgShifts(orgId: string) {
+  try {
+    const shifts = await Shift.scan('orgId').contains(orgId).exec();
+    return shifts.toJSON();
+  } catch (error) {
+    console.log('Failed to getShiftById', error);
+    return null;
+  }
+}
+
 export async function createShift(shift: {
   name: string;
   orgId: string;
