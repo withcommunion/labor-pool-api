@@ -89,6 +89,20 @@ export async function addMemberToOrg(orgId: string, userId: string) {
   }
 }
 
+export async function addFriendToOrg(mainOrgId: string, friendlyOrgId: string) {
+  try {
+    const updatedOrg = await Org.update(
+      { id: mainOrgId },
+      // @ts-expect-error this is a dynamoose TS bug
+      { $ADD: { friends: [friendlyOrgId] } }
+    );
+    return updatedOrg;
+  } catch (error) {
+    console.log('Failed to addMemberToOrg', error);
+    return null;
+  }
+}
+
 export async function addScheduleToOrg(orgId: string, scheduleId: string) {
   try {
     const updatedOrg = await Org.update(
@@ -102,8 +116,3 @@ export async function addScheduleToOrg(orgId: string, scheduleId: string) {
     return null;
   }
 }
-
-/**
-    // @ts-expect-error its ok
-    await user.update({ id: userId }, { $ADD: { shiftHistory: ['asdf3'] } });
-    */
