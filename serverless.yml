@@ -61,7 +61,7 @@ custom:
     number: 5
   bundle:
     packager: yarn
-  serverless-offline:
+  serverless-bundle:
     useChildProcesses: true
 
 functions:
