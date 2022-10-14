@@ -45,6 +45,11 @@ provider:
             - 'dynamodb:*'
           Resource:
             - Fn::GetAtt: [usersTable, Arn]
+        - Effect: 'Allow'
+          Action:
+            - 'dynamodb:*'
+          Resource:
+            - Fn::GetAtt: [orgsTable, Arn]
 
   environment:
     STAGE: ${sls:stage}
@@ -75,6 +80,16 @@ functions:
           path: /user/{id}
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
+  postOrg:
+    name: ${self:service}-postOrg-${sls:stage}
+    handler: src/endpoints/api-post-org.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: POST
+          path: /org
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
   postConfirmCreateUser:
     name: postConfirmCreateUser-${sls:stage}
     handler: src/cognitoTriggers/post-confirm-create-user.handler
@@ -91,6 +106,22 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:service}-usersTable-${sls:stage}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        SSESpecification:
+          SSEEnabled: true
+        # https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_StreamSpecification.html
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+    orgsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-orgsTable-${sls:stage}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
