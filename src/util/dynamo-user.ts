@@ -11,7 +11,8 @@ interface IUser extends Item {
   id: string;
   firstName: string;
   lastName: string;
-  primaryOrgId: string;
+  orgs: string[];
+  orgRoles: { orgId: string; role: string }[];
   shiftHistory: string[];
   phoneNumber: string;
   allowSms: boolean;
@@ -25,7 +26,16 @@ const schema = new dynamoose.Schema(
     id: String,
     firstName: String,
     lastName: String,
-    primaryOrgId: String,
+    orgs: {
+      type: Array,
+      schema: [String],
+      default: [],
+    },
+    orgRoles: {
+      type: Array,
+      schema: [Object],
+      default: [],
+    },
     shiftHistory: {
       type: Array,
       schema: [String],
@@ -40,6 +50,7 @@ const schema = new dynamoose.Schema(
       createdAt: ['createdAtSecs'],
       updatedAt: ['updatedAtSecs'],
     },
+    saveUnknown: true,
   }
 );
 
@@ -74,6 +85,20 @@ export async function createUser(user: {
     return newUser;
   } catch (error) {
     console.log('Failed to createUser', error);
+    return null;
+  }
+}
+
+export async function addOrgToUser(userId: string, orgId: string) {
+  try {
+    const updatedUser = await User.update(
+      { id: userId },
+      // @ts-expect-error this is a dynamoose TS bug
+      { $ADD: { orgs: [orgId], orgRoles: [{ orgId, role: 'employee' }] } }
+    );
+    return updatedUser;
+  } catch (error) {
+    console.log('Failed to addOrgToUser', error);
     return null;
   }
 }
