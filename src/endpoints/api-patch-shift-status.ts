@@ -28,10 +28,11 @@ export const handler = async (
     const { memberId, status } = parseBody(event.body || '');
     if (!memberId || !status) {
       return generateReturn(500, {
-        message: 'Failed to parse memberId from body',
+        message: 'Failed to parse status or memberId from body',
         body: event.body,
-        requiredFields: ['memberId', 'status'],
-        availableStatuses: "'open' | 'applied' | 'filled' | 'expired'",
+        requiredFields: ['status'],
+        availableStatuses:
+          "'open' | 'broadcasting' | 'applied' | 'filled' | 'expired'",
       });
     }
 
