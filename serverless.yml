@@ -85,6 +85,16 @@ functions:
           path: /user/{id}
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
+  getUserShifts:
+    name: ${self:service}-getUserShifts-${sls:stage}
+    handler: src/endpoints/api-get-user-shifts.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: GET
+          path: /user/{id}/shifts
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
   postOrg:
     name: ${self:service}-postOrg-${sls:stage}
     handler: src/endpoints/api-post-org.handler
