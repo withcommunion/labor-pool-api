@@ -17,8 +17,8 @@ export interface IShift extends Item {
   assignedTo: string;
   beginDate: string;
   endDate: string;
-  createdAtSecs: number;
-  updatedAtSecs: number;
+  createdAtMs: number;
+  updatedAtMs: number;
 }
 
 const schema = new dynamoose.Schema(
@@ -37,8 +37,8 @@ const schema = new dynamoose.Schema(
   },
   {
     timestamps: {
-      createdAt: ['createdAtSecs'],
-      updatedAt: ['updatedAtSecs'],
+      createdAt: ['createdAtMs'],
+      updatedAt: ['updatedAtMs'],
     },
     saveUnknown: true,
   }

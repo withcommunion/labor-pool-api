@@ -17,8 +17,8 @@ interface IUser extends Item {
   phoneNumber: string;
   allowSms: boolean;
   email: string;
-  createdAtSecs: number;
-  updatedAtSecs: number;
+  createdAtMs: number;
+  updatedAtMs: number;
 }
 
 const schema = new dynamoose.Schema(
@@ -47,8 +47,8 @@ const schema = new dynamoose.Schema(
   },
   {
     timestamps: {
-      createdAt: ['createdAtSecs'],
-      updatedAt: ['updatedAtSecs'],
+      createdAt: ['createdAtMs'],
+      updatedAt: ['updatedAtMs'],
     },
     saveUnknown: true,
   }
