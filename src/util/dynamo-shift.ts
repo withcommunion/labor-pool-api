@@ -12,7 +12,7 @@ export interface IShift extends Item {
   id: string;
   name: string;
   orgId: string;
-  status: 'open' | 'applied' | 'filled' | 'expired';
+  status: 'open' | 'broadcasting' | 'applied' | 'filled' | 'expired';
   description: string;
   assignedTo: string;
   beginDate: string;
