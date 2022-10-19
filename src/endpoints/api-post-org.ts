@@ -27,6 +27,9 @@ export const handler = async (
       claims &&
       ((claims.username as string) || (claims['cognito:username'] as string));
 
+    /**
+     * TODO: Handle when the name (id) is already taken
+     */
     const org = parseBody(event.body || '', requestingUserId);
     if (!org || !org.name) {
       return generateReturn(500, {
