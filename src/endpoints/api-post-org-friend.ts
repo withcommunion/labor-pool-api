@@ -60,6 +60,14 @@ export const handler = async (
       });
     }
 
+    if (mainOrg === friendlyOrg) {
+      return generateReturn(400, {
+        message: 'You are trying to add yourself as a friend',
+        requestingOrg: mainOrg.id,
+        friendlyOrg: friendlyOrg.id,
+      });
+    }
+
     logger.verbose('Adding friendly orgId to org', {
       values: { mainOrg, friendlyOrgId },
     });
