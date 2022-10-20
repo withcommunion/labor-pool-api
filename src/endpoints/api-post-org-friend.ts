@@ -61,8 +61,8 @@ export const handler = async (
     }
 
     if (mainOrg === friendlyOrg) {
-      return generateReturn(400, {
-        message: 'You are trying to add yourself as a friend',
+      return generateReturn(200, {
+        message: 'You are befriending yourself!',
         requestingOrg: mainOrg.id,
         friendlyOrg: friendlyOrg.id,
       });
