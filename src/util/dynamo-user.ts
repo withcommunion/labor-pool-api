@@ -89,12 +89,22 @@ export async function createUser(user: {
   }
 }
 
-export async function addOrgToUser(userId: string, orgId: string) {
+export async function addOrgToUser(
+  userId: string,
+  orgId: string,
+  role?: string
+) {
   try {
+    const roleToAdd = role ? role : 'employee';
     const updatedUser = await User.update(
       { id: userId },
-      // @ts-expect-error this is a dynamoose TS bug
-      { $ADD: { orgs: [orgId], orgRoles: [{ orgId, role: 'employee' }] } }
+      {
+        // @ts-expect-error this is a dynamoose TS bug
+        $ADD: {
+          orgs: [orgId],
+          orgRoles: [{ orgId, role: roleToAdd }],
+        },
+      }
     );
     return updatedUser;
   } catch (error) {
