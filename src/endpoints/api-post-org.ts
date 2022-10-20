@@ -5,6 +5,7 @@ import logger, {
 } from '../util/winston-logger-util';
 
 import { createOrg } from 'src/util/dynamo-org';
+import { addOrgToUser } from 'src/util/dynamo-user';
 
 interface ExpectedPostBody {
   name: string;
@@ -39,6 +40,11 @@ export const handler = async (
       });
     }
 
+    const fullOrg = {
+      ...org,
+      primaryMembers: [requestingUserId],
+    };
+
     logger.verbose('Creating org', { values: { org } });
     const savedOrg = await createOrg(org);
     if (!savedOrg) {
@@ -49,6 +55,19 @@ export const handler = async (
       });
     }
     logger.info('Created org', { values: { savedOrg } });
+
+    logger.verbose('Adding org to user requesting user', {
+      values: {
+        requestingUserId,
+        orgId: fullOrg.id,
+      },
+    });
+    const updatedUser = await addOrgToUser(
+      requestingUserId,
+      fullOrg.id,
+      'manager'
+    );
+    logger.info('Updated user', { values: { updatedUser } });
 
     const returnValue = generateReturn(200, {
       ...org,
