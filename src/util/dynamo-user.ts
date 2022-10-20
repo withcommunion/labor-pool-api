@@ -92,7 +92,7 @@ export async function createUser(user: {
 export async function addOrgToUser(
   userId: string,
   orgId: string,
-  role?: string
+  role?: 'manager' | 'employee'
 ) {
   try {
     const roleToAdd = role ? role : 'employee';

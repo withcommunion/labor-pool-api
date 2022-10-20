@@ -9,7 +9,7 @@ import { addOrgToUser, getUserById } from 'src/util/dynamo-user';
 
 interface ExpectedPostBody {
   memberId?: string;
-  role?: string;
+  role?: 'manager' | 'employee';
 }
 
 export const handler = async (
@@ -114,7 +114,10 @@ function parseBody(bodyString: string) {
     const body = JSON.parse(bodyString || '') as ExpectedPostBody;
 
     const memberId = body.memberId?.toLowerCase();
-    const role = body.role?.toLowerCase();
+    const role =
+      body.role?.toLowerCase() === 'manager'
+        ? 'manager'
+        : ('employee' as 'manager' | 'employee');
 
     return { memberId, role };
   } catch (error) {
