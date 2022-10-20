@@ -9,6 +9,7 @@ import { addOrgToUser, getUserById } from 'src/util/dynamo-user';
 
 interface ExpectedPostBody {
   memberId?: string;
+  role?: string;
 }
 
 export const handler = async (
@@ -24,7 +25,7 @@ export const handler = async (
 
     const orgId = event.pathParameters?.id;
 
-    const { memberId } = parseBody(event.body || '');
+    const { memberId, role } = parseBody(event.body || '');
     if (!memberId) {
       return generateReturn(500, {
         message: 'Failed to parse memberId from body',
@@ -76,7 +77,7 @@ export const handler = async (
     if (member.orgs.includes(orgId)) {
       logger.info('Friendly Org is already friends with main org');
     } else {
-      const savedMember = await addOrgToUser(memberId, orgId);
+      const savedMember = await addOrgToUser(memberId, orgId, role);
       logger.info('Updated user', { values: { savedMember } });
       if (!savedMember) {
         logger.info('Failed to save org friend', {
@@ -113,8 +114,9 @@ function parseBody(bodyString: string) {
     const body = JSON.parse(bodyString || '') as ExpectedPostBody;
 
     const memberId = body.memberId?.toLowerCase();
+    const role = body.role?.toLowerCase();
 
-    return memberId ? { memberId } : {};
+    return { memberId, role };
   } catch (error) {
     logger.error('Failed to parse body', {
       values: { error, body: bodyString },
