@@ -1,4 +1,6 @@
 import type { APIGatewayProxyEventV2WithJWTAuthorizer } from 'aws-lambda';
+import { getTime } from 'date-fns';
+
 import { generateReturn } from '../util/api-util';
 import logger, {
   setDefaultLoggerMetaForApi,
@@ -11,7 +13,7 @@ import { addShiftToUser, getUserById } from 'src/util/dynamo-user';
 interface ExpectedPostBody {
   name: string;
   orgId: string;
-  beginDate: string;
+  startDate: string;
   endDate: string;
   description?: string;
   status?: string;
@@ -43,8 +45,8 @@ export const handler = async (
       !shift ||
       !shift.name ||
       !shift.orgId ||
-      !shift.beginDate ||
-      !shift.endDate
+      !shift.startTimeMs ||
+      !shift.endTimeMs
     ) {
       return generateReturn(500, {
         message: 'You are missing some required fields',
@@ -119,8 +121,10 @@ function parseBody(bodyString: string) {
       status: body.status || 'open',
       description: body.description,
       assignedTo: body.assignedTo,
-      beginDate: body.beginDate,
-      endDate: body.endDate,
+      startTimeMs: getTime(new Date(body.startDate.trim())),
+      endTimeMs: getTime(new Date(body.endDate.trim())),
+      startDateIso: body.startDate,
+      endDateIso: body.endDate,
     } as IShift;
 
     return shift;

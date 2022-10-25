@@ -15,8 +15,10 @@ export interface IShift extends Item {
   status: 'open' | 'broadcasting' | 'applied' | 'filled' | 'expired';
   description: string;
   assignedTo: string;
-  beginDate: string;
-  endDate: string;
+  startTimeMs: number;
+  endTimeMs: number;
+  startDateIso: string;
+  endDateIso: string;
   createdAtMs: number;
   updatedAtMs: number;
 }
@@ -80,17 +82,9 @@ export async function getUserShifts(userId: string) {
   }
 }
 
-export async function createShift(shift: {
-  name: string;
-  orgId: string;
-  description: string;
-  beginDate: string;
-  endDate: string;
-  status: IShift['status'];
-  assignedTo: string;
-}) {
+export async function createShift(shift: IShift) {
   try {
-    const newShift = await Shift.create({ id: nanoid(), ...shift });
+    const newShift = await Shift.create({ ...shift, id: nanoid() });
     return newShift;
   } catch (error) {
     console.log('Failed to createShift', error);
