@@ -28,7 +28,7 @@ provider:
       cognitoJwtAuthorizer-prod:
         type: jwt
         identitySource: $request.header.Authorization
-        issuerUrl: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_SeeaUyuuH
+        issuerUrl: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_nP11J1qIb
         audience:
           # TODO: Figure out the implications of this, is clientId proper?
           - 795lg5ui539om7sspm4sej0q99
