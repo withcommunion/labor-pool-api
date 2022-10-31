@@ -210,6 +210,16 @@ functions:
           path: /shift/{id}/application
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
+  patchShiftApplicationStatus:
+    name: ${self:service}-patchShiftApplicationStatus-${sls:stage}
+    handler: src/endpoints/api-patch-shift-application-status.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: PATCH
+          path: /shift/application/{id}/status
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
   postConfirmCreateUser:
     name: postConfirmCreateUser-${sls:stage}
     handler: src/cognitoTriggers/post-confirm-create-user.handler

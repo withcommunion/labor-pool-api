@@ -106,3 +106,20 @@ export async function getShiftApplicationsByUserId(userId: string) {
     return null;
   }
 }
+
+export async function updateApplicationStatus(
+  applicationId: string,
+  status: 'accepted' | 'rejected'
+) {
+  try {
+    const updatedOrg = await ShiftApplication.update(
+      { id: applicationId },
+      { status: status }
+    );
+
+    return updatedOrg;
+  } catch (error) {
+    console.log('Failed to addMemberToOrg', error);
+    return null;
+  }
+}
