@@ -70,3 +70,39 @@ export async function createApplication(shift: ShiftApplication) {
     return null;
   }
 }
+
+export async function getShiftApplicationsByOrgId(orgId: string) {
+  try {
+    const shiftApplications = await ShiftApplication.scan('orgId')
+      .contains(orgId)
+      .exec();
+    return shiftApplications.toJSON();
+  } catch (error) {
+    console.log('Failed to getShiftApplicationsByOrgId', error);
+    return null;
+  }
+}
+
+export async function getShiftApplicationsByShiftId(shiftId: string) {
+  try {
+    const shiftApplications = await ShiftApplication.scan('shiftId')
+      .contains(shiftId)
+      .exec();
+    return shiftApplications.toJSON();
+  } catch (error) {
+    console.log('Failed to getShiftApplicationsByShiftId', error);
+    return null;
+  }
+}
+
+export async function getShiftApplicationsByUserId(userId: string) {
+  try {
+    const shiftApplications = await ShiftApplication.scan('userId')
+      .contains(userId)
+      .exec();
+    return shiftApplications.toJSON();
+  } catch (error) {
+    console.log('Failed to getShiftApplicationsByUserId', error);
+    return null;
+  }
+}
