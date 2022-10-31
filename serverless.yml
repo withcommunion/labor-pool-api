@@ -150,6 +150,16 @@ functions:
           path: /org/{id}/shifts
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
+  getOrgShiftApplications:
+    name: ${self:service}-getOrgShiftApplications-${sls:stage}
+    handler: src/endpoints/api-get-org-shift-applications.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: GET
+          path: /org/{id}/shifts/applications
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
   postShift:
     name: ${self:service}-postShift-${sls:stage}
     handler: src/endpoints/api-post-shift.handler
@@ -168,6 +178,16 @@ functions:
       - httpApi:
           method: PATCH
           path: /shift/{id}/status
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
+  postShiftApplication:
+    name: ${self:service}-postShiftApplication-${sls:stage}
+    handler: src/endpoints/api-post-shift-application.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: POST
+          path: /shift/{id}/application
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
   postConfirmCreateUser:

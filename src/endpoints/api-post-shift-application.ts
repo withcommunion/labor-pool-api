@@ -10,7 +10,6 @@ import {
 } from '../util/dynamo-shift-application';
 
 interface ExpectedPostBody {
-  shiftId: string;
   orgId: string;
   userId: string;
   description: string;
@@ -26,6 +25,8 @@ export const handler = async (
     logger.verbose('incomingEventAuth', {
       values: { authorizer: event.requestContext.authorizer },
     });
+
+    const shiftId = event.pathParameters?.id;
 
     /**
      * TODO: We will obviously want to put guards here
@@ -43,6 +44,13 @@ export const handler = async (
       ((claims.username as string) || (claims['cognito:username'] as string));
     */
 
+    if (!shiftId) {
+      return generateReturn(500, {
+        message: 'Shift ID not provided not provided in request path',
+        pathParams: event.pathParameters,
+      });
+    }
+
     const shiftApplication = parseBody(event.body || '');
     if (!shiftApplication) {
       return generateReturn(500, {
@@ -54,6 +62,7 @@ export const handler = async (
 
     const fullShift = {
       ...shiftApplication,
+      shiftId,
     } as ShiftApplication;
 
     logger.verbose('Creating ShiftApplication', { values: { fullShift } });
@@ -94,13 +103,11 @@ function parseBody(bodyString: string) {
   try {
     const body = JSON.parse(bodyString || '') as ExpectedPostBody;
 
-    const shiftId = body.shiftId;
     const orgId = body.orgId;
     const userId = body.userId;
     const description = body.description;
 
     const application = {
-      shiftId,
       orgId,
       userId,
       description,
