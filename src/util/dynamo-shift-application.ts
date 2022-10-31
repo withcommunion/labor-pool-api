@@ -88,7 +88,7 @@ export async function getShiftApplicationsByShiftId(shiftId: string) {
     const shiftApplications = await ShiftApplication.scan('shiftId')
       .contains(shiftId)
       .exec();
-    return shiftApplications.toJSON();
+    return shiftApplications.toJSON() as ShiftApplication[];
   } catch (error) {
     console.log('Failed to getShiftApplicationsByShiftId', error);
     return null;

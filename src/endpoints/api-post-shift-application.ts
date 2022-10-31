@@ -8,6 +8,7 @@ import {
   createApplication,
   ShiftApplication,
 } from '../util/dynamo-shift-application';
+import { getShiftById } from 'src/util/dynamo-shift';
 
 interface ExpectedPostBody {
   orgId: string;
@@ -30,7 +31,6 @@ export const handler = async (
 
     /**
      * TODO: We will obviously want to put guards here
-     * Ensure that shift exists
      * Ensure that org exists
      * Ensure that user exists
      * Only users who have access to the shift can apply
@@ -60,6 +60,14 @@ export const handler = async (
       });
     }
 
+    const shiftBeingAppliedTo = await getShiftById(shiftId);
+    if (!shiftBeingAppliedTo) {
+      return generateReturn(404, {
+        message: 'Shift being applied to not found',
+        shiftId,
+      });
+    }
+
     const fullShift = {
       ...shiftApplication,
       shiftId,
@@ -68,9 +76,11 @@ export const handler = async (
     logger.verbose('Creating ShiftApplication', { values: { fullShift } });
     const savedApplication = await createApplication(fullShift);
     if (!savedApplication) {
-      logger.info('Failed to save org', { values: { savedApplication } });
+      logger.info('Failed to save shift application', {
+        values: { savedApplication },
+      });
       return generateReturn(500, {
-        message: 'Failed to save org',
+        message: 'Failed to save shift application',
         fullShift,
       });
     }

@@ -4,7 +4,12 @@ import logger, {
   setDefaultLoggerMetaForApi,
 } from '../util/winston-logger-util';
 
-import { updateApplicationStatus } from '../util/dynamo-shift-application';
+import {
+  updateApplicationStatus,
+  getApplicationById,
+  getShiftApplicationsByShiftId,
+} from '../util/dynamo-shift-application';
+import { applyUserToShift, getShiftById } from 'src/util/dynamo-shift';
 
 interface ExpectedPatchBody {
   status: 'accepted' | 'rejected';
@@ -64,6 +69,22 @@ export const handler = async (
       });
     }
 
+    const shiftApplication = await getApplicationById(applicationId);
+    if (!shiftApplication) {
+      return generateReturn(404, {
+        message: 'Shift application not found',
+        applicationId,
+      });
+    }
+
+    const shiftBeingAppliedTo = await getShiftById(shiftApplication.shiftId);
+    if (!shiftBeingAppliedTo) {
+      return generateReturn(404, {
+        message: 'Shift being applied to not found',
+        shiftId: shiftApplication.shiftId,
+      });
+    }
+
     logger.verbose('Updating ShiftApplication status', {
       values: { applicationStatus, applicationId },
     });
@@ -87,6 +108,49 @@ export const handler = async (
       values: { updatedApplication },
     });
 
+    const otherShiftApplications = (
+      await getShiftApplicationsByShiftId(shiftApplication.shiftId)
+    )?.filter((app) => app.id !== applicationId);
+    if (otherShiftApplications) {
+      try {
+        await Promise.all(
+          otherShiftApplications?.map((application) => {
+            // eslint-disable-next-line
+            updateApplicationStatus(application.id, 'rejected');
+          })
+        );
+      } catch (error) {
+        logger.error('Failed to reject other shift applications', {
+          values: { error, otherShiftApplications },
+        });
+        console.error('Failed to reject other shift applications', error);
+
+        return generateReturn(500, {
+          message: 'Failed to reject other shift applications',
+          error,
+          otherShiftApplications,
+        });
+      }
+    }
+
+    try {
+      logger.info('Updating shift with accepted application', {
+        values: { shiftApplication },
+      });
+      await applyUserToShift(
+        shiftApplication.shiftId,
+        shiftApplication.userId,
+        'filled'
+      );
+    } catch (error) {
+      console.error('Failed to update shift with accepted application', error);
+      return generateReturn(500, {
+        message: 'Failed to updated shift to filled',
+        error,
+        shiftId: shiftApplication.shiftId,
+      });
+    }
+
     const returnValue = generateReturn(200, {
       ...updatedApplication,
     });
@@ -95,6 +159,7 @@ export const handler = async (
     /**
      * TODO notify the org that an application was updated
      * TODO notify the user that their application was updated
+     * TODO Update shift status if application is accepted
      */
 
     return returnValue;
