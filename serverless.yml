@@ -55,6 +55,11 @@ provider:
             - 'dynamodb:*'
           Resource:
             - Fn::GetAtt: [shiftsTable, Arn]
+        - Effect: 'Allow'
+          Action:
+            - 'dynamodb:*'
+          Resource:
+            - Fn::GetAtt: [shiftApplicationsTable, Arn]
 
   environment:
     STAGE: ${sls:stage}
@@ -190,9 +195,6 @@ resources:
         BillingMode: PAY_PER_REQUEST
         SSESpecification:
           SSEEnabled: true
-        # https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_StreamSpecification.html
-        StreamSpecification:
-          StreamViewType: NEW_IMAGE
     orgsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -206,9 +208,6 @@ resources:
         BillingMode: PAY_PER_REQUEST
         SSESpecification:
           SSEEnabled: true
-        # https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_StreamSpecification.html
-        StreamSpecification:
-          StreamViewType: NEW_IMAGE
     shiftsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -222,9 +221,18 @@ resources:
         BillingMode: PAY_PER_REQUEST
         SSESpecification:
           SSEEnabled: true
-        # https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_StreamSpecification.html
-        StreamSpecification:
-          StreamViewType: NEW_IMAGE
+    shiftApplicationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-shiftApplicationsTable-${sls:stage}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        SSESpecification:
+          SSEEnabled: true
     cognitoLaborPoolUsersDemo:
       Type: AWS::Cognito::UserPool
       Properties:
