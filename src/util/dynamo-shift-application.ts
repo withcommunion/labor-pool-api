@@ -63,7 +63,14 @@ export async function getApplicationById(id: string) {
 
 export async function createApplication(shift: ShiftApplication) {
   try {
-    const savedApplication = await ShiftApplication.create(shift);
+    /**
+     * TODO: Follow this pattern elsewhere
+     * Enables more insight into what is going in DB
+     * And overwrites on save
+     */
+    const application = new ShiftApplication(shift);
+    console.log('Saving Application', { application });
+    const savedApplication = await application.save();
     return savedApplication;
   } catch (error) {
     console.log('Failed to createApplication', error);
