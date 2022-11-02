@@ -137,24 +137,27 @@ export const handler = async (
           });
         }
       }
-    }
 
-    try {
-      logger.info('Updating shift with accepted application', {
-        values: { shiftApplication },
-      });
-      await applyUserToShift(
-        shiftApplication.shiftId,
-        shiftApplication.userId,
-        'filled'
-      );
-    } catch (error) {
-      console.error('Failed to update shift with accepted application', error);
-      return generateReturn(500, {
-        message: 'Failed to updated shift to filled',
-        error,
-        shiftId: shiftApplication.shiftId,
-      });
+      try {
+        logger.info('Updating shift with accepted application', {
+          values: { shiftApplication },
+        });
+        await applyUserToShift(
+          shiftApplication.shiftId,
+          shiftApplication.userId,
+          'filled'
+        );
+      } catch (error) {
+        console.error(
+          'Failed to update shift with accepted application',
+          error
+        );
+        return generateReturn(500, {
+          message: 'Failed to updated shift to filled',
+          error,
+          shiftId: shiftApplication.shiftId,
+        });
+      }
     }
 
     const returnValue = generateReturn(200, {
