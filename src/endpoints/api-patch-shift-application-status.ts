@@ -108,28 +108,34 @@ export const handler = async (
       values: { updatedApplication },
     });
 
-    const otherShiftApplications = (
-      await getShiftApplicationsByShiftId(shiftApplication.shiftId)
-    )?.filter((app) => app.id !== applicationId);
-    if (otherShiftApplications) {
-      try {
-        await Promise.all(
-          otherShiftApplications?.map((application) => {
-            // eslint-disable-next-line
-            updateApplicationStatus(application.id, 'rejected');
-          })
-        );
-      } catch (error) {
-        logger.error('Failed to reject other shift applications', {
-          values: { error, otherShiftApplications },
-        });
-        console.error('Failed to reject other shift applications', error);
+    if (applicationStatus === 'accepted') {
+      logger.verbose('Getting all applications for shift');
+      const otherShiftApplications = (
+        await getShiftApplicationsByShiftId(shiftApplication.shiftId)
+      )?.filter((app) => app.id !== applicationId);
+      if (otherShiftApplications) {
+        try {
+          await Promise.all(
+            otherShiftApplications?.map((application) => {
+              // eslint-disable-next-line
+              updateApplicationStatus(application.id, 'rejected');
+            })
+          );
+          logger.info('Updated other shift applications to rejected', {
+            values: { otherShiftApplications },
+          });
+        } catch (error) {
+          logger.error('Failed to reject other shift applications', {
+            values: { error, otherShiftApplications },
+          });
+          console.error('Failed to reject other shift applications', error);
 
-        return generateReturn(500, {
-          message: 'Failed to reject other shift applications',
-          error,
-          otherShiftApplications,
-        });
+          return generateReturn(500, {
+            message: 'Failed to reject other shift applications',
+            error,
+            otherShiftApplications,
+          });
+        }
       }
     }
 
