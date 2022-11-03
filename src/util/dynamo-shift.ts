@@ -5,13 +5,14 @@
  */
 import * as dynamoose from 'dynamoose';
 import { Item } from 'dynamoose/dist/Item';
-import { nanoid } from 'nanoid';
+import { generateUrlFriendlyId } from './dynamo-util';
 
 // Strongly typed model
 export interface IShift extends Item {
   id: string;
   name: string;
   orgId: string;
+  ownerUrn: string;
   status: 'open' | 'broadcasting' | 'applied' | 'filled' | 'expired';
   description: string;
   assignedTo: string;
@@ -25,9 +26,13 @@ export interface IShift extends Item {
 
 const schema = new dynamoose.Schema(
   {
-    id: String,
+    id: {
+      type: String,
+      default: generateUrlFriendlyId(20),
+    },
     name: String,
     orgId: String,
+    ownerUrn: String,
     status: {
       type: String,
       default: 'open',
@@ -64,10 +69,20 @@ export async function getShiftById(id: string) {
 
 export async function getOrgShifts(orgId: string) {
   try {
-    const shifts = await Shift.scan('orgId').contains(orgId).exec();
+    const shifts = await Shift.scan('ownerUrn').contains(orgId).exec();
     return shifts.toJSON();
   } catch (error) {
     console.log('Failed to getOrgShifts', error);
+    return null;
+  }
+}
+
+export async function getAllShifts() {
+  try {
+    const shifts = await Shift.scan().exec();
+    return shifts.toJSON();
+  } catch (error) {
+    console.log('Failed to getAllShifts', error);
     return null;
   }
 }
@@ -84,8 +99,10 @@ export async function getUserShifts(userId: string) {
 
 export async function createShift(shift: IShift) {
   try {
-    const newShift = await Shift.create({ ...shift, id: nanoid() });
-    return newShift;
+    const newShift = new Shift(shift);
+    console.log('createShift', { newShift });
+    const savedShift = await newShift.save();
+    return savedShift;
   } catch (error) {
     console.log('Failed to createShift', error);
     return null;

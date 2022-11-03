@@ -8,14 +8,14 @@ import logger, {
 
 import { createShift, IShift } from 'src/util/dynamo-shift';
 import { getOrgById } from 'src/util/dynamo-org';
-import { addShiftToUser, getUserById } from 'src/util/dynamo-user';
+import { getUserById } from 'src/util/dynamo-user';
 
 interface ExpectedPostBody {
   name: string;
-  orgId: string;
   startDate: string;
   endDate: string;
   description?: string;
+  orgId?: string;
   status?: string;
   assignedTo?: string;
 }
@@ -33,47 +33,52 @@ export const handler = async (
 
     /**
      * TODO: Ensure that requesting user is manager in org
-    const claims = event.requestContext.authorizer?.jwt?.claims;
     // For some reason it can come through in two seperate ways
-    const requestingUserId =
+       */
+    const claims = event.requestContext.authorizer?.jwt?.claims;
+    const requestUserId =
       claims &&
       ((claims.username as string) || (claims['cognito:username'] as string));
-       */
 
-    const shift = parseBody(event.body || '');
+    const parsedShift = parseBody(event.body || '');
     if (
-      !shift ||
-      !shift.name ||
-      !shift.orgId ||
-      !shift.startTimeMs ||
-      !shift.endTimeMs
+      !parsedShift ||
+      !parsedShift.name ||
+      !parsedShift.startTimeMs ||
+      !parsedShift.endTimeMs
     ) {
       return generateReturn(500, {
         message: 'You are missing some required fields',
         body: event.body,
-        parsedBody: shift,
-        requiredFields: ['name', 'orgId', 'beginDate', 'endDate'],
+        parsedBody: parsedShift,
+        requiredFields: ['name', 'beginDate', 'endDate'],
       });
     }
 
-    logger.verbose('Fetching org', { values: { orgId: shift.orgId } });
-    const org = await getOrgById(shift.orgId);
-    if (!org) {
+    const ownerUrn = parsedShift.orgId
+      ? `urn:org:${parsedShift.orgId}`
+      : `urn:user:${requestUserId}`;
+
+    logger.verbose('Fetching org', { values: { orgId: parsedShift.orgId } });
+    const org = await getOrgById(parsedShift.orgId);
+    if (parsedShift.orgId && !org) {
       return generateReturn(404, {
         message: 'Org not found',
-        orgId: shift.orgId,
+        orgId: parsedShift.orgId,
       });
     }
 
-    if (shift.assignedTo) {
-      const userToAssignTo = await getUserById(shift.assignedTo);
+    if (parsedShift.assignedTo) {
+      const userToAssignTo = await getUserById(parsedShift.assignedTo);
       if (!userToAssignTo) {
         return generateReturn(404, {
           message: 'User assigned to not found',
-          orgId: shift.orgId,
+          orgId: parsedShift.orgId,
         });
       }
     }
+
+    const shift = { ...parsedShift, ownerUrn } as IShift;
 
     logger.verbose('Creating shift', { values: { shift } });
     const savedShift = await createShift(shift);
@@ -85,12 +90,6 @@ export const handler = async (
       });
     }
     logger.info('Created shift', { values: { savedShift } });
-
-    if (shift.assignedTo) {
-      logger.verbose('Adding shift to user');
-      await addShiftToUser(shift.assignedTo, savedShift.id);
-      logger.info('Added shift to user');
-    }
 
     const returnValue = generateReturn(200, {
       ...savedShift,
