@@ -180,6 +180,16 @@ functions:
           path: /shift
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
+  getShifts:
+    name: ${self:service}-getShifts-${sls:stage}
+    handler: src/endpoints/api-get-shifts.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: GET
+          path: /shift
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
   getShiftApplications:
     name: ${self:service}-getShiftApplications-${sls:stage}
     handler: src/endpoints/api-get-shift-applications.handler
