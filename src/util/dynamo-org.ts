@@ -5,7 +5,7 @@
  */
 import * as dynamoose from 'dynamoose';
 import { Item } from 'dynamoose/dist/Item';
-import { customRandom, urlAlphabet } from 'nanoid';
+import { generateUrlFriendlyId } from './dynamo-util';
 
 // Strongly typed model
 interface IOrg extends Item {
@@ -25,9 +25,7 @@ const schema = new dynamoose.Schema(
     name: String,
     joinCode: {
       type: String,
-      default: customRandom(urlAlphabet, 10, (size) => {
-        return new Uint8Array(size).map(() => 256 * Math.random());
-      }),
+      default: generateUrlFriendlyId(6),
     },
     primaryMembers: {
       type: Array,
