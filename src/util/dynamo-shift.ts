@@ -109,6 +109,16 @@ export async function createShift(shift: IShift) {
   }
 }
 
+export async function updateShift(id: string, shift: Partial<IShift>) {
+  try {
+    const updatedShift = await Shift.update(id, shift);
+    return updatedShift;
+  } catch (error) {
+    console.log('Failed to updateShift', error);
+    return null;
+  }
+}
+
 export async function addUserToShift(shiftId: string, userId: string) {
   try {
     const updatedShift = await Shift.update({
