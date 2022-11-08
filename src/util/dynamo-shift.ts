@@ -89,8 +89,16 @@ export async function getAllShifts() {
 
 export async function getUserShifts(userId: string) {
   try {
-    const shifts = await Shift.scan('assignedTo').contains(userId).exec();
-    return shifts.toJSON();
+    const shiftsAssignedTo = await Shift.scan('assignedTo')
+      .contains(userId)
+      .exec();
+    const shiftsCreated = await Shift.scan('ownerUrn').contains(userId).exec();
+
+    const allUserShifts = [...shiftsAssignedTo, ...shiftsCreated].map(
+      (shiftItem) => shiftItem
+    );
+
+    return allUserShifts;
   } catch (error) {
     console.log('Failed to getUserShifts', error);
     return null;

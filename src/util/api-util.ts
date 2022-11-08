@@ -9,7 +9,8 @@ export interface returnObject {
 
 export function generateReturn(
   statusCode: number,
-  body: Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body: Record<string, unknown> | any
 ): returnObject {
   return {
     statusCode,
@@ -19,4 +20,8 @@ export function generateReturn(
       'Access-Control-Allow-Credentials': true,
     },
   };
+}
+
+export function parseIdFromUrn(urn: string): string {
+  return urn.split(':')[2];
 }

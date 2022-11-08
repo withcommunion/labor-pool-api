@@ -41,7 +41,6 @@ export const handler = async (
       return generateReturn(404, { message: 'Shifts not found', shiftId });
     }
 
-    // @ts-expect-error it's okay to return the whole object
     const returnValue = generateReturn(200, shiftApplications);
     logger.info('Returning', { values: returnValue });
 
