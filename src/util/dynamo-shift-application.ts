@@ -78,6 +78,17 @@ export async function createApplication(shift: ShiftApplication) {
   }
 }
 
+export async function deleteApplication(shiftApplicationId: string) {
+  try {
+    await ShiftApplication.delete(shiftApplicationId);
+
+    return true;
+  } catch (error) {
+    console.log('Failed to deleteApplication', error);
+    return false;
+  }
+}
+
 export async function getShiftApplicationsByOrgId(orgId: string) {
   try {
     const shiftApplications = await ShiftApplication.scan('orgId')
