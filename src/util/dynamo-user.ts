@@ -19,6 +19,10 @@ interface IUser extends Item {
   email: string;
   createdAtMs: number;
   updatedAtMs: number;
+  description: string;
+  location: string;
+  imageUrl?: string;
+  coverImageUrl?: string;
 }
 
 const schema = new dynamoose.Schema(
@@ -44,6 +48,10 @@ const schema = new dynamoose.Schema(
     phoneNumber: String,
     email: String,
     allowSms: Boolean,
+    description: String,
+    location: String,
+    imageUrl: String,
+    coverImageUrl: String,
   },
   {
     timestamps: {
@@ -79,6 +87,8 @@ export async function createUser(user: {
   allowSms: boolean;
   email: string;
   shiftHistory?: string[];
+  imageUrl?: string;
+  coverImageUrl?: string;
 }) {
   try {
     const newUser = await User.create(user);
