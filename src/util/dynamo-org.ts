@@ -8,7 +8,7 @@ import { Item } from 'dynamoose/dist/Item';
 import { generateUrlFriendlyId } from './dynamo-util';
 
 // Strongly typed model
-interface IOrg extends Item {
+export interface IOrg extends Item {
   id: string;
   name: string;
   primaryMembers: string[];
@@ -63,6 +63,16 @@ export async function getOrgById(id: string) {
     return org;
   } catch (error) {
     console.log('Failed to getOrgById', error);
+    return null;
+  }
+}
+
+export async function getAllOrgs() {
+  try {
+    const allOrgs = await Org.scan().exec();
+    return allOrgs;
+  } catch (error) {
+    console.log('Failed to getAllOrgs', error);
     return null;
   }
 }

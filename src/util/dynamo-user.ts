@@ -7,7 +7,7 @@ import * as dynamoose from 'dynamoose';
 import { Item } from 'dynamoose/dist/Item';
 
 // Strongly typed model
-interface IUser extends Item {
+export interface IUser extends Item {
   id: string;
   firstName: string;
   lastName: string;
@@ -74,6 +74,16 @@ export async function getUserById(id: string) {
     return user;
   } catch (error) {
     console.log('Failed to getUserById', error);
+    return null;
+  }
+}
+
+export async function getAllUsers() {
+  try {
+    const allUsers = await User.scan().exec();
+    return allUsers;
+  } catch (error) {
+    console.log('Failed to getAllUsers', error);
     return null;
   }
 }
