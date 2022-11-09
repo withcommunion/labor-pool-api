@@ -11,10 +11,16 @@ import { generateUrlFriendlyId } from './dynamo-util';
 export interface IOrg extends Item {
   id: string;
   name: string;
+  phoneNumber: string;
+  email: string;
+  location: string;
   primaryMembers: string[];
   friends: string[];
   schedules: string[];
   joinCode: string;
+  imageUrl: string;
+  coverImageUrl: string;
+  description: string;
   createdAtMs: number;
   updatedAtMs: number;
 }
@@ -23,6 +29,12 @@ const schema = new dynamoose.Schema(
   {
     id: String,
     name: String,
+    imageUrl: String,
+    coverImageUrl: String,
+    description: String,
+    phoneNumber: String,
+    location: String,
+    email: String,
     joinCode: {
       type: String,
       default: generateUrlFriendlyId(6),
