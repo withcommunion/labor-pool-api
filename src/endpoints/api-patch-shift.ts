@@ -80,12 +80,12 @@ export const handler = async (
 
     const shift = { ...parsedShift } as Partial<IShift>;
 
-    logger.verbose('Creating shift', { values: { shift } });
+    logger.verbose('Updating shift', { values: { shift } });
     const savedShift = await updateShift(shiftId, shift);
     if (!savedShift) {
-      logger.info('Failed to save shift', { values: { savedShift } });
+      logger.info('Failed to update shift', { values: { savedShift } });
       return generateReturn(500, {
-        message: 'Failed to save shif',
+        message: 'Failed to update shif',
         shift,
       });
     }

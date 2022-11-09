@@ -109,6 +109,16 @@ export async function createUser(user: {
   }
 }
 
+export async function updateUser(id: string, user: Partial<IUser>) {
+  try {
+    const updatedUser = await User.update(id, user);
+    return updatedUser;
+  } catch (error) {
+    console.log('Failed to updateUser', error);
+    return null;
+  }
+}
+
 export async function addOrgToUser(
   userId: string,
   orgId: string,
