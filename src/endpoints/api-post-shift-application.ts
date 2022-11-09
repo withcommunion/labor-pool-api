@@ -36,13 +36,11 @@ export const handler = async (
      * Only users who have access to the shift can apply
      */
 
-    /**
     const claims = event.requestContext.authorizer?.jwt?.claims;
     // For some reason it can come through in two seperate ways
-    const requestingUserId =
+    const requestUserId =
       claims &&
       ((claims.username as string) || (claims['cognito:username'] as string));
-    */
 
     if (!shiftId) {
       return generateReturn(500, {
@@ -67,10 +65,14 @@ export const handler = async (
         shiftId,
       });
     }
+    const ownerUrn = shiftApplication.orgId
+      ? `urn:org:${shiftApplication.orgId}`
+      : `urn:user:${requestUserId}`;
 
     const fullShift = {
       ...shiftApplication,
       shiftId,
+      ownerUrn,
     } as ShiftApplication;
 
     logger.verbose('Creating ShiftApplication', { values: { fullShift } });

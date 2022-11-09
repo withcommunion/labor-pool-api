@@ -8,16 +8,11 @@ export interface ShiftApplication {
   orgId: string;
   userId: string;
   description: string;
+  ownerUrn: string;
   status: 'pending' | 'accepted' | 'rejected';
 }
 
 interface IShiftApplication extends Item, ShiftApplication {
-  id: string;
-  shiftId: string;
-  orgId: string;
-  userId: string;
-  description: string;
-  status: 'pending' | 'accepted' | 'rejected';
   createdAtMs: number;
   updatedAtMs: number;
 }
@@ -28,6 +23,7 @@ const schema = new dynamoose.Schema(
       type: String,
       default: nanoid(),
     },
+    ownerUrn: String,
     shiftId: String,
     orgId: String,
     userId: String,
