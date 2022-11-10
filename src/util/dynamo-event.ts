@@ -80,3 +80,13 @@ export async function getAllEvents() {
     return null;
   }
 }
+
+export async function getEventsByOwnerUrn(ownerUrn: string) {
+  try {
+    const events = await Event.scan('ownerUrn').contains(ownerUrn).exec();
+    return events;
+  } catch (error) {
+    console.log('Failed to getEventsByOwnerUrn', error);
+    return null;
+  }
+}

@@ -125,6 +125,16 @@ functions:
           path: /entity/{urn}/socials
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
+  getEntityEvents:
+    name: ${self:service}-getEntitySocials-${sls:stage}
+    handler: src/endpoints/api-get-entity-events.handler
+    events:
+      # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
+      - httpApi:
+          method: GET
+          path: /entity/{urn}/events
+          authorizer:
+            name: cognitoJwtAuthorizer-${sls:stage}
   getUserShiftApplications:
     name: ${self:service}-getUserShiftApplications-${sls:stage}
     handler: src/endpoints/api-get-user-shift-applications.handler
