@@ -279,6 +279,27 @@ functions:
           pool: ${self:service}-users-${sls:stage}
           trigger: PostConfirmation
           existing: true
+  captureEvents:
+    name: captureEvents-${sls:stage}
+    handler: src/dynamoTriggers/captureEvents.handler
+    timeout: 5
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [usersTable, StreamArn]
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [orgsTable, StreamArn]
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [shiftsTable, StreamArn]
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [shiftApplicationsTable, StreamArn]
 
 resources:
   Resources:
@@ -295,6 +316,8 @@ resources:
         BillingMode: PAY_PER_REQUEST
         SSESpecification:
           SSEEnabled: true
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
     orgsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -308,6 +331,8 @@ resources:
         BillingMode: PAY_PER_REQUEST
         SSESpecification:
           SSEEnabled: true
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
     shiftsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -321,6 +346,8 @@ resources:
         BillingMode: PAY_PER_REQUEST
         SSESpecification:
           SSEEnabled: true
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
     shiftApplicationsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -334,6 +361,23 @@ resources:
         BillingMode: PAY_PER_REQUEST
         SSESpecification:
           SSEEnabled: true
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+    eventsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-eventsTable-${sls:stage}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        SSESpecification:
+          SSEEnabled: true
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
     cognitoLaborPoolUsersDemo:
       Type: AWS::Cognito::UserPool
       Properties:
