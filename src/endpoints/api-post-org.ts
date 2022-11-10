@@ -96,6 +96,7 @@ function parseBody(bodyString: string, creatingUserId: string) {
     const org = {
       id,
       name: body.name,
+      ownerUrn: `urn:user:${creatingUserId}`,
       primaryMembers: [creatingUserId],
     };
 

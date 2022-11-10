@@ -13,6 +13,7 @@ export interface IOrg extends Item {
   name: string;
   phoneNumber: string;
   email: string;
+  ownerUrn: string;
   location: string;
   primaryMembers: string[];
   friends: string[];
@@ -30,6 +31,7 @@ const schema = new dynamoose.Schema(
     id: String,
     name: String,
     imageUrl: String,
+    ownerUrn: String,
     coverImageUrl: String,
     description: String,
     phoneNumber: String,

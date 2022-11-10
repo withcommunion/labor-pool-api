@@ -1,8 +1,3 @@
-/**
- * Schema
- * Model
- * Use it
- */
 import * as dynamoose from 'dynamoose';
 import { Item } from 'dynamoose/dist/Item';
 import { generateUrlFriendlyId } from './dynamo-util';
