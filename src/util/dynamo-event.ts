@@ -33,6 +33,7 @@ const schema = new dynamoose.Schema(
     record: Object,
   },
   {
+    saveUnknown: true,
     timestamps: {
       createdAt: ['createdAtMs'],
       updatedAt: ['updatedAtMs'],

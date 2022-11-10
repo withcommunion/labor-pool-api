@@ -1,4 +1,5 @@
 import type { DynamoDBStreamEvent } from 'aws-lambda';
+import * as dynamoose from 'dynamoose';
 
 import logger from '../util/winston-logger-util';
 
@@ -22,11 +23,16 @@ export const handler = async (
     logger.verbose('Insering events into dynamo...', {
       values: { records: event.Records },
     });
-    const insertResps = Promise.all(
+    const insertResps = await Promise.all(
       event.Records.map(async (record) => {
         const eventName = record.eventName;
-        const recordToStore =
-          record.dynamodb?.NewImage || record.dynamodb?.OldImage || {};
+
+        const converter = dynamoose.aws.converter();
+
+        const recordToStore = converter.unmarshall(
+          // @ts-expect-error its ok
+          record.dynamodb?.NewImage || record.dynamodb?.OldImage || {}
+        );
 
         let recordType = '';
         if (record.eventSourceARN?.includes('shiftApplicationsTable')) {
@@ -39,7 +45,7 @@ export const handler = async (
           recordType = 'org';
         }
 
-        const urn = `urn:${recordType}:${recordToStore.id?.S || ''}`;
+        const urn = `urn:${recordType}:${(recordToStore?.id as string) || ''}`;
 
         const event = {
           eventUrn: urn,
