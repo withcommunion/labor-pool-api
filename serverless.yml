@@ -286,7 +286,7 @@ functions:
           existing: true
   captureEvents:
     name: captureEvents-${sls:stage}
-    handler: src/dynamoTriggers/captureEvents.handler
+    handler: src/dynamoTriggers/capture-events.handler
     timeout: 5
     events:
       - stream:
