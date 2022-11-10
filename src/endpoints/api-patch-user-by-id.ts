@@ -95,10 +95,15 @@ function parseBody(bodyString: string): Partial<IUser> | null {
       phoneNumber: body.phoneNumber,
       location: body.location,
       description: body.description,
+      // allowSms: body?.allowSms.toString(),
     };
 
     const updatedUser = {} as Partial<IUser>;
 
+    /**
+     * TODO: Allow sms isnt working because false boolean is falsey
+     * Doesn't work as a string either
+     */
     Object.keys(user).forEach((key) => {
       // @ts-expect-error it's okay
       if (user[key]) {
