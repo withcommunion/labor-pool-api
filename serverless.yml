@@ -126,7 +126,7 @@ functions:
           authorizer:
             name: cognitoJwtAuthorizer-${sls:stage}
   getEntityEvents:
-    name: ${self:service}-getEntitySocials-${sls:stage}
+    name: ${self:service}-getEntityEvents-${sls:stage}
     handler: src/endpoints/api-get-entity-events.handler
     events:
       # http-api docs https://www.serverless.com/framework/docs/providers/aws/events/http-api
