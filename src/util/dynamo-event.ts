@@ -11,6 +11,7 @@ import { generateUrlFriendlyId } from './dynamo-util';
 export interface Event {
   id: string;
   eventUrn: string;
+  ownerUrn: string;
   event: string;
   description: string;
   record: object;
@@ -27,6 +28,7 @@ const schema = new dynamoose.Schema(
       type: String,
       default: generateUrlFriendlyId(6),
     },
+    ownerUrn: String,
     eventUrn: String,
     event: String,
     description: String,

@@ -5,6 +5,8 @@ import logger from '../util/winston-logger-util';
 
 import { createEvent } from 'src/util/dynamo-event';
 
+const converter = dynamoose.aws.converter();
+
 export const handler = async (
   event: DynamoDBStreamEvent,
   context: { awsRequestId: string }
@@ -18,7 +20,6 @@ export const handler = async (
     logger.info('Processing records...', {
       values: { records: event.Records },
     });
-    console.log(event.Records[0]);
 
     logger.verbose('Insering events into dynamo...', {
       values: { records: event.Records },
@@ -26,8 +27,6 @@ export const handler = async (
     const insertResps = await Promise.all(
       event.Records.map(async (record) => {
         const eventName = record.eventName;
-
-        const converter = dynamoose.aws.converter();
 
         const recordToStore = converter.unmarshall(
           // @ts-expect-error its ok
@@ -52,6 +51,7 @@ export const handler = async (
           event: eventName,
           description: `Record ${eventName || ''} for ${recordType}`,
           record: recordToStore,
+          ownerUrn: recordToStore?.ownerUrn as string,
         };
 
         return createEvent(event);
