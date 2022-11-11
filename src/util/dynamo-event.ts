@@ -26,7 +26,7 @@ const schema = new dynamoose.Schema(
   {
     id: {
       type: String,
-      default: generateUrlFriendlyId(6),
+      default: generateUrlFriendlyId(18),
     },
     ownerUrn: String,
     eventUrn: String,
