@@ -4,7 +4,7 @@ import logger, {
   setDefaultLoggerMetaForApi,
 } from '../util/winston-logger-util';
 
-import { getUserShifts } from 'src/util/dynamo-shift';
+import { getShiftsAssociatedWithUrn } from 'src/util/dynamo-shift';
 
 export const handler = async (
   event: APIGatewayProxyEventV2WithJWTAuthorizer
@@ -26,7 +26,7 @@ export const handler = async (
     const userId = event.pathParameters?.id || '';
 
     logger.verbose('Fetching Orgs shifts', { values: { userId } });
-    const userShifts = await getUserShifts(userId);
+    const userShifts = await getShiftsAssociatedWithUrn(`urn:user:${userId}`);
     logger.info('Received shifts', { values: { userShifts } });
     /**
      * TODO:

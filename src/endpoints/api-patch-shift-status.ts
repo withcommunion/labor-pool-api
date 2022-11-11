@@ -62,18 +62,6 @@ export const handler = async (
       values: { shift, member },
     });
 
-    if (shift.assignedTo) {
-      logger.info('Shift already assigned', { values: { shift } });
-
-      const shiftAssignedToUser = await getUserById(shift.assignedTo);
-      return generateReturn(400, {
-        message: `Shift is already assigned to a user: ${
-          shiftAssignedToUser?.firstName || ''
-        } ${shiftAssignedToUser?.lastName || ''}`,
-        user: shiftAssignedToUser,
-      });
-    }
-
     logger.verbose('Adding user to shift', {
       values: { shiftId, memberId, status },
     });

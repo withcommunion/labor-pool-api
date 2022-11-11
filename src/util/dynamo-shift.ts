@@ -11,7 +11,7 @@ export interface IShift extends Item {
   status: 'open' | 'broadcasting' | 'applied' | 'filled' | 'expired';
   location: string;
   description: string;
-  assignedTo: string;
+  assignedTo: string[];
   startTimeMs: number;
   endTimeMs: number;
   startDateIso: string;
@@ -35,7 +35,10 @@ const schema = new dynamoose.Schema(
     },
     description: String,
     location: String,
-    assignedTo: String,
+    assignedTo: {
+      type: Array,
+      default: [],
+    },
     beginDate: String,
     endDate: String,
   },
@@ -102,10 +105,28 @@ export async function getAllShifts() {
   }
 }
 
+export async function getShiftsAssociatedWithUrn(urn: string) {
+  try {
+    const shiftsAssignedTo = await Shift.scan('assignedTo')
+      .contains(urn)
+      .exec();
+    const shiftsCreated = await Shift.scan('ownerUrn').contains(urn).exec();
+
+    const allUserShifts = [...shiftsAssignedTo, ...shiftsCreated].map(
+      (shiftItem) => shiftItem
+    );
+
+    return allUserShifts;
+  } catch (error) {
+    console.log('Failed to getUserShifts', error);
+    return null;
+  }
+}
+
 export async function getUserShifts(userId: string) {
   try {
     const shiftsAssignedTo = await Shift.scan('assignedTo')
-      .contains(userId)
+      .contains(`urn:user:${userId}`)
       .exec();
     const shiftsCreated = await Shift.scan('ownerUrn').contains(userId).exec();
 
@@ -144,10 +165,15 @@ export async function updateShift(id: string, shift: Partial<IShift>) {
 
 export async function addUserToShift(shiftId: string, userId: string) {
   try {
-    const updatedShift = await Shift.update({
-      id: shiftId,
-      assignedTo: userId,
-    });
+    const updatedShift = await Shift.update(
+      {
+        id: shiftId,
+      },
+      {
+        // @ts-expect-error its ok
+        $ADD: { assignedTo: userId },
+      }
+    );
     return updatedShift;
   } catch (error) {
     console.log('Failed to addUserToShift', error);
@@ -161,11 +187,16 @@ export async function applyUserToShift(
   status: IShift['status']
 ) {
   try {
-    const updatedShift = await Shift.update({
-      id: shiftId,
-      assignedTo: userId,
-      status: status,
-    });
+    const updatedShift = await Shift.update(
+      {
+        id: shiftId,
+        status: status,
+      },
+      {
+        // @ts-expect-error its ok
+        $ADD: { assignedTo: userId },
+      }
+    );
     return updatedShift;
   } catch (error) {
     console.log('Failed to applyUserToShift', error);

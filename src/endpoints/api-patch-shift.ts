@@ -8,7 +8,6 @@ import logger, {
 
 import { IShift, updateShift } from 'src/util/dynamo-shift';
 import { getOrgById } from 'src/util/dynamo-org';
-import { getUserById } from 'src/util/dynamo-user';
 
 interface ExpectedPatchBody {
   name?: string;
@@ -64,16 +63,6 @@ export const handler = async (
       if (!org) {
         return generateReturn(404, {
           message: 'Org not found',
-          orgId: parsedShift.orgId,
-        });
-      }
-    }
-
-    if (parsedShift.assignedTo) {
-      const userToAssignTo = await getUserById(parsedShift.assignedTo);
-      if (!userToAssignTo) {
-        return generateReturn(404, {
-          message: 'User assigned to not found',
           orgId: parsedShift.orgId,
         });
       }
