@@ -15,6 +15,7 @@ interface ExpectedPatchBody {
   startDate?: string;
   endDate?: string;
   description?: string;
+  location?: string;
   orgId?: string;
   status?: string;
   assignedTo?: string;
@@ -119,6 +120,7 @@ function parseBody(bodyString: string): Partial<IShift> | null {
       name: body.name,
       status: body.status || 'open',
       description: body.description,
+      location: body.location,
       assignedTo: body.assignedTo,
       startTimeMs: body.startDate
         ? getTime(new Date(body.startDate.trim()))

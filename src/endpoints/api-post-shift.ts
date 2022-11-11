@@ -14,6 +14,7 @@ interface ExpectedPostBody {
   name: string;
   startDate: string;
   endDate: string;
+  location?: string;
   description?: string;
   orgId?: string;
   status?: string;
@@ -119,6 +120,7 @@ function parseBody(bodyString: string) {
       name: body.name,
       status: body.status || 'open',
       description: body.description,
+      location: body.location,
       assignedTo: body.assignedTo,
       startTimeMs: getTime(new Date(body.startDate.trim())),
       endTimeMs: getTime(new Date(body.endDate.trim())),

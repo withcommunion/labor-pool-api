@@ -9,6 +9,7 @@ export interface IShift extends Item {
   orgId: string;
   ownerUrn: string;
   status: 'open' | 'broadcasting' | 'applied' | 'filled' | 'expired';
+  location: string;
   description: string;
   assignedTo: string;
   startTimeMs: number;
@@ -33,6 +34,7 @@ const schema = new dynamoose.Schema(
       default: 'open',
     },
     description: String,
+    location: String,
     assignedTo: String,
     beginDate: String,
     endDate: String,
