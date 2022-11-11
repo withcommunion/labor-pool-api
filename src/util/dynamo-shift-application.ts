@@ -87,7 +87,7 @@ export async function deleteApplication(shiftApplicationId: string) {
 
 export async function getShiftApplicationsByOrgId(orgId: string) {
   try {
-    const shiftApplications = await ShiftApplication.scan('orgId')
+    const shiftApplications = await ShiftApplication.scan('ownerUrn')
       .contains(orgId)
       .exec();
     return shiftApplications.toJSON();
@@ -111,7 +111,7 @@ export async function getShiftApplicationsByShiftId(shiftId: string) {
 
 export async function getShiftApplicationsByUserId(userId: string) {
   try {
-    const shiftApplications = await ShiftApplication.scan('userId')
+    const shiftApplications = await ShiftApplication.scan('ownerUrn')
       .contains(userId)
       .exec();
     return shiftApplications.toJSON();
