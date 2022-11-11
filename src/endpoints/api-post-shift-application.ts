@@ -11,8 +11,7 @@ import {
 import { getShiftById } from 'src/util/dynamo-shift';
 
 interface ExpectedPostBody {
-  orgId: string;
-  userId: string;
+  ownerUrn: string;
   description: string;
 }
 
@@ -36,11 +35,11 @@ export const handler = async (
      * Only users who have access to the shift can apply
      */
 
-    const claims = event.requestContext.authorizer?.jwt?.claims;
+    // const claims = event.requestContext.authorizer?.jwt?.claims;
     // For some reason it can come through in two seperate ways
-    const requestUserId =
-      claims &&
-      ((claims.username as string) || (claims['cognito:username'] as string));
+    // const requestUserId =
+    //   claims &&
+    //   ((claims.username as string) || (claims['cognito:username'] as string));
 
     if (!shiftId) {
       return generateReturn(500, {
@@ -65,14 +64,10 @@ export const handler = async (
         shiftId,
       });
     }
-    const ownerUrn = shiftApplication.orgId
-      ? `urn:org:${shiftApplication.orgId}`
-      : `urn:user:${requestUserId}`;
 
     const fullShift = {
       ...shiftApplication,
       shiftId,
-      ownerUrn,
     } as ShiftApplication;
 
     logger.verbose('Creating ShiftApplication', { values: { fullShift } });
@@ -115,13 +110,11 @@ function parseBody(bodyString: string) {
   try {
     const body = JSON.parse(bodyString || '') as ExpectedPostBody;
 
-    const orgId = body.orgId;
-    const userId = body.userId;
     const description = body.description;
+    const ownerUrn = body.ownerUrn;
 
     const application = {
-      orgId,
-      userId,
+      ownerUrn,
       description,
     };
 

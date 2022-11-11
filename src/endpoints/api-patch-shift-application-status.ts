@@ -7,7 +7,6 @@ import logger, {
 import {
   updateApplicationStatus,
   getApplicationById,
-  getShiftApplicationsByShiftId,
 } from '../util/dynamo-shift-application';
 import { applyUserToShift, getShiftById } from 'src/util/dynamo-shift';
 
@@ -109,6 +108,7 @@ export const handler = async (
     });
 
     if (applicationStatus === 'accepted') {
+      /**
       logger.verbose('Getting all applications for shift');
       const otherShiftApplications = (
         await getShiftApplicationsByShiftId(shiftApplication.shiftId)
@@ -137,6 +137,7 @@ export const handler = async (
           });
         }
       }
+       */
 
       try {
         logger.info('Updating shift with accepted application', {
@@ -144,7 +145,7 @@ export const handler = async (
         });
         await applyUserToShift(
           shiftApplication.shiftId,
-          shiftApplication.userId,
+          shiftApplication.ownerUrn,
           'filled'
         );
       } catch (error) {
