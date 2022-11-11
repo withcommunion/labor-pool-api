@@ -37,8 +37,26 @@ const schema = new dynamoose.Schema(
   {
     saveUnknown: true,
     timestamps: {
-      createdAt: ['createdAtMs'],
-      updatedAt: ['updatedAtMs'],
+      createdAt: {
+        createdAtMs: {
+          type: {
+            value: Number,
+            settings: {
+              storage: 'milliseconds',
+            },
+          },
+        },
+      },
+      updatedAt: {
+        updatedAtMs: {
+          type: {
+            value: Number,
+            settings: {
+              storage: 'milliseconds',
+            },
+          },
+        },
+      },
     },
   }
 );
@@ -74,7 +92,7 @@ export async function getEventById(id: string) {
 export async function getAllEvents() {
   try {
     const events = await Event.scan().exec();
-    return events;
+    return events.toJSON();
   } catch (error) {
     console.log('Failed to getAllEvents', error);
     return null;

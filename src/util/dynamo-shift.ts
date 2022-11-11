@@ -41,8 +41,26 @@ const schema = new dynamoose.Schema(
   },
   {
     timestamps: {
-      createdAt: ['createdAtMs'],
-      updatedAt: ['updatedAtMs'],
+      createdAt: {
+        createdAtMs: {
+          type: {
+            value: Number,
+            settings: {
+              storage: 'milliseconds',
+            },
+          },
+        },
+      },
+      updatedAt: {
+        updatedAtMs: {
+          type: {
+            value: Number,
+            settings: {
+              storage: 'milliseconds',
+            },
+          },
+        },
+      },
     },
     saveUnknown: true,
   }
