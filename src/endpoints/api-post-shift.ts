@@ -8,7 +8,6 @@ import logger, {
 
 import { createShift, IShift } from 'src/util/dynamo-shift';
 import { getOrgById } from 'src/util/dynamo-org';
-import { getUserById } from 'src/util/dynamo-user';
 
 interface ExpectedPostBody {
   name: string;
@@ -69,16 +68,6 @@ export const handler = async (
       });
     }
 
-    if (parsedShift.assignedTo) {
-      const userToAssignTo = await getUserById(parsedShift.assignedTo);
-      if (!userToAssignTo) {
-        return generateReturn(404, {
-          message: 'User assigned to not found',
-          orgId: parsedShift.orgId,
-        });
-      }
-    }
-
     const shift = { ...parsedShift, ownerUrn } as IShift;
 
     logger.verbose('Creating shift', { values: { shift } });
@@ -121,7 +110,7 @@ function parseBody(bodyString: string) {
       status: body.status || 'open',
       description: body.description,
       location: body.location,
-      assignedTo: body.assignedTo,
+      assignedTo: [body.assignedTo],
       startTimeMs: getTime(new Date(body.startDate.trim())),
       endTimeMs: getTime(new Date(body.endDate.trim())),
       startDateIso: body.startDate,
