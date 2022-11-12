@@ -22,6 +22,18 @@ export interface IOrg extends Item {
   imageUrl: string;
   coverImageUrl: string;
   description: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+  phone?: string;
+  facebookHandle?: string;
+  twitterHandle?: string;
+  instagramHandle?: string;
+  website?: string;
+  logo?: string;
   createdAtMs: number;
   updatedAtMs: number;
 }
@@ -37,6 +49,18 @@ const schema = new dynamoose.Schema(
     phoneNumber: String,
     location: String,
     email: String,
+    addressLine1: String,
+    addressLine2: String,
+    city: String,
+    state: String,
+    zip: String,
+    country: String,
+    phone: String,
+    facebookHandle: String,
+    twitterHandle: String,
+    instagramHandle: String,
+    website: String,
+    logo: String,
     joinCode: {
       type: String,
       default: generateUrlFriendlyId(6),
@@ -58,6 +82,7 @@ const schema = new dynamoose.Schema(
     },
   },
   {
+    saveUnknown: true,
     timestamps: {
       createdAt: {
         createdAtMs: {

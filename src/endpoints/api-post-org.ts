@@ -9,6 +9,21 @@ import { addOrgToUser } from 'src/util/dynamo-user';
 
 interface ExpectedPostBody {
   name: string;
+  ownerUrn: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+  phoneNumber?: string;
+  email?: string;
+  facebookHandle?: string;
+  twitterHandle?: string;
+  instagramHandle?: string;
+  website?: string;
+  logo?: string;
+  description?: string;
 }
 
 export const handler = async (
@@ -98,6 +113,20 @@ function parseBody(bodyString: string, creatingUserId: string) {
       name: body.name,
       ownerUrn: `urn:user:${creatingUserId}`,
       primaryMembers: [creatingUserId],
+      addressLine1: body.addressLine1,
+      addressLine2: body.addressLine2,
+      city: body.city,
+      state: body.state,
+      zip: body.zip,
+      country: body.country,
+      phoneNumber: body.phoneNumber,
+      email: body.email,
+      facebookHandle: body.facebookHandle,
+      twitterHandle: body.twitterHandle,
+      instagramHandle: body.instagramHandle,
+      website: body.website,
+      logo: body.logo,
+      description: body.description,
     };
 
     return org;
