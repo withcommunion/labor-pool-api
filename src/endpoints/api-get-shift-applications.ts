@@ -1,10 +1,16 @@
 import type { APIGatewayProxyEventV2WithJWTAuthorizer } from 'aws-lambda';
-import { generateReturn } from '../util/api-util';
+import {
+  generateReturn,
+  parseEntityTypeFromUrn,
+  parseIdFromUrn,
+} from '../util/api-util';
 import logger, {
   setDefaultLoggerMetaForApi,
 } from '../util/winston-logger-util';
 
 import { getShiftApplicationsByShiftId } from 'src/util/dynamo-shift-application';
+import { batchGetUserByIds, IUser } from 'src/util/dynamo-user';
+import { batchGetOrgByIds, IOrg } from 'src/util/dynamo-org';
 
 export const handler = async (
   event: APIGatewayProxyEventV2WithJWTAuthorizer
@@ -40,8 +46,49 @@ export const handler = async (
       });
       return generateReturn(404, { message: 'Shifts not found', shiftId });
     }
+    const ownerUrnsInAllEvents = shiftApplications.map(
+      (shift) => shift.ownerUrn
+    );
 
-    const returnValue = generateReturn(200, shiftApplications);
+    const userIdsInEvents = ownerUrnsInAllEvents
+      .filter((ownerUrn) => parseEntityTypeFromUrn(ownerUrn) === 'user')
+      .map((ownerUrn) => parseIdFromUrn(ownerUrn))
+      .reduce((acc, curr) => {
+        if (!acc.includes(curr)) {
+          return [...acc, curr];
+        } else {
+          return acc;
+        }
+      }, [] as string[]);
+
+    const orgIdsInEvents = ownerUrnsInAllEvents
+      .filter((ownerUrn) => parseEntityTypeFromUrn(ownerUrn) === 'org')
+      .map((ownerUrn) => parseIdFromUrn(ownerUrn))
+      .reduce((acc, curr) => {
+        if (!acc.includes(curr)) {
+          return [...acc, curr];
+        } else {
+          return acc;
+        }
+      }, [] as string[]);
+
+    const allUsersInEvents = await batchGetUserByIds(userIdsInEvents);
+    const allOrgsInEvents = await batchGetOrgByIds(orgIdsInEvents);
+
+    const urnToEntityMap = {} as Record<string, { org?: IOrg; user?: IUser }>;
+    allUsersInEvents?.forEach((user) => {
+      urnToEntityMap[`urn:user:${user.id}`] = { user };
+    });
+    allOrgsInEvents?.forEach((org) => {
+      urnToEntityMap[`urn:org:${org.id}`] = { org };
+    });
+
+    const applicationsWithOwnerEntity = shiftApplications.map((shift) => {
+      const ownerEntity = urnToEntityMap[shift.ownerUrn];
+      return { ...shift, ownerEntity };
+    });
+
+    const returnValue = generateReturn(200, applicationsWithOwnerEntity);
     logger.info('Returning', { values: returnValue });
 
     return returnValue;

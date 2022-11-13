@@ -1,6 +1,8 @@
 import * as dynamoose from 'dynamoose';
 import { Item } from 'dynamoose/dist/Item';
 import { nanoid } from 'nanoid';
+import { IOrg } from './dynamo-org';
+import { IUser } from './dynamo-user';
 
 export interface ShiftApplication {
   id: string;
@@ -9,6 +11,10 @@ export interface ShiftApplication {
   userId: string;
   description: string;
   ownerUrn: string;
+  ownerEntity?: {
+    user?: IUser;
+    org?: IOrg;
+  };
   status: 'pending' | 'accepted' | 'rejected';
 }
 

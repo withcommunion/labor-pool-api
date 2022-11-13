@@ -18,6 +18,10 @@ export interface IShift extends Item {
     user?: IUser;
     org?: IOrg;
   };
+  assignedToEntities?: {
+    user?: IUser;
+    org?: IOrg;
+  }[];
   startTimeMs: number;
   endTimeMs: number;
   startDateIso: string;

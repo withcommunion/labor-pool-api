@@ -50,8 +50,17 @@ export const handler = async (
     }
 
     const ownerUrnsInAllEvents = userShifts.map((shift) => shift.ownerUrn);
+    const assignedToInShifts = userShifts.reduce(
+      (acc, shift) => [...acc, ...shift.assignedTo],
+      [] as string[]
+    );
 
-    const userIdsInEvents = ownerUrnsInAllEvents
+    const allEntitiesInShifts = [
+      ...ownerUrnsInAllEvents,
+      ...assignedToInShifts,
+    ];
+
+    const userIdsInEvents = allEntitiesInShifts
       .filter((ownerUrn) => parseEntityTypeFromUrn(ownerUrn) === 'user')
       .map((ownerUrn) => parseIdFromUrn(ownerUrn))
       .reduce((acc, curr) => {
@@ -62,7 +71,7 @@ export const handler = async (
         }
       }, [] as string[]);
 
-    const orgIdsInEvents = ownerUrnsInAllEvents
+    const orgIdsInEvents = allEntitiesInShifts
       .filter((ownerUrn) => parseEntityTypeFromUrn(ownerUrn) === 'org')
       .map((ownerUrn) => parseIdFromUrn(ownerUrn))
       .reduce((acc, curr) => {
@@ -86,7 +95,10 @@ export const handler = async (
 
     const shiftsWithOwnerEntity = userShifts.map((shift) => {
       const ownerEntity = urnToEntityMap[shift.ownerUrn];
-      return { ...shift, ownerEntity };
+      const assignedToEntities = shift.assignedTo.map(
+        (id) => urnToEntityMap[id]
+      );
+      return { ...shift, ownerEntity, assignedToEntities };
     });
 
     const returnValue = generateReturn(200, shiftsWithOwnerEntity);
