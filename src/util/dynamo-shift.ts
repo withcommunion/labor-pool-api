@@ -85,6 +85,16 @@ export async function getShiftById(id: string) {
   }
 }
 
+export async function deleteShiftById(id: string) {
+  try {
+    await Shift.delete(id);
+    return true;
+  } catch (error) {
+    console.log('Failed to deleteShift', error);
+    return false;
+  }
+}
+
 export async function getOrgShifts(orgId: string) {
   try {
     const shifts = await Shift.scan('ownerUrn').contains(orgId).exec();
