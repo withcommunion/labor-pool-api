@@ -1,5 +1,7 @@
 import * as dynamoose from 'dynamoose';
 import { Item } from 'dynamoose/dist/Item';
+import { IOrg } from './dynamo-org';
+import { IUser } from './dynamo-user';
 import { generateUrlFriendlyId } from './dynamo-util';
 
 // Strongly typed model
@@ -12,6 +14,10 @@ export interface IShift extends Item {
   location: string;
   description: string;
   assignedTo: string[];
+  ownerEntity?: {
+    user?: IUser;
+    org?: IOrg;
+  };
   startTimeMs: number;
   endTimeMs: number;
   startDateIso: string;
