@@ -1,10 +1,16 @@
 import type { APIGatewayProxyEventV2WithJWTAuthorizer } from 'aws-lambda';
-import { generateReturn } from '../util/api-util';
+import {
+  generateReturn,
+  parseEntityTypeFromUrn,
+  parseIdFromUrn,
+} from '../util/api-util';
 import logger, {
   setDefaultLoggerMetaForApi,
 } from '../util/winston-logger-util';
 
 import { getEventsByOwnerUrn } from 'src/util/dynamo-event';
+import { batchGetUserByIds, IUser } from 'src/util/dynamo-user';
+import { batchGetOrgByIds, IOrg } from 'src/util/dynamo-org';
 
 export const handler = async (
   event: APIGatewayProxyEventV2WithJWTAuthorizer
@@ -37,16 +43,55 @@ export const handler = async (
     logger.verbose('Fetching all entities events', {
       values: { entityUrn },
     });
-    const allEntityEvents = await getEventsByOwnerUrn(entityUrn);
-    logger.info('Received entities', { values: { allEntityEvents } });
+    const allEvents = (await getEventsByOwnerUrn(entityUrn)) || [];
+    logger.info('Received entities', { values: { allEvents } });
 
     /**
      * TODO:
      * We obviously want to put safeguards here
      * to ensure that not everyone can see the users data
      */
+    const ownerUrnsInAllEvents = allEvents.map((event) => event.ownerUrn);
 
-    const returnValue = generateReturn(200, allEntityEvents);
+    const userIdsInEvents = ownerUrnsInAllEvents
+      .filter((ownerUrn) => parseEntityTypeFromUrn(ownerUrn) === 'user')
+      .map((ownerUrn) => parseIdFromUrn(ownerUrn))
+      .reduce((acc, curr) => {
+        if (!acc.includes(curr)) {
+          return [...acc, curr];
+        } else {
+          return acc;
+        }
+      }, [] as string[]);
+
+    const orgIdsInEvents = ownerUrnsInAllEvents
+      .filter((ownerUrn) => parseEntityTypeFromUrn(ownerUrn) === 'org')
+      .map((ownerUrn) => parseIdFromUrn(ownerUrn))
+      .reduce((acc, curr) => {
+        if (!acc.includes(curr)) {
+          return [...acc, curr];
+        } else {
+          return acc;
+        }
+      }, [] as string[]);
+
+    const allUsersInEvents = await batchGetUserByIds(userIdsInEvents);
+    const allOrgsInEvents = await batchGetOrgByIds(orgIdsInEvents);
+
+    const urnToEntityMap = {} as Record<string, { org?: IOrg; user?: IUser }>;
+    allUsersInEvents?.forEach((user) => {
+      urnToEntityMap[`urn:user:${user.id}`] = { user };
+    });
+    allOrgsInEvents?.forEach((org) => {
+      urnToEntityMap[`urn:org:${org.id}`] = { org };
+    });
+
+    const eventsWithOwnerEntity = allEvents.map((event) => {
+      const ownerEntity = urnToEntityMap[event.ownerUrn];
+      return { ...event, ownerEntity };
+    });
+
+    const returnValue = generateReturn(200, eventsWithOwnerEntity);
     logger.info('Returning', { values: returnValue });
 
     return returnValue;
