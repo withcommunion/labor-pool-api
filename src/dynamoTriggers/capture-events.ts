@@ -51,7 +51,7 @@ export const handler = async (
           event: eventName,
           description: `Record ${eventName || ''} for ${recordType}`,
           record: recordToStore,
-          ownerUrn: recordToStore?.ownerUrn as string,
+          ownerUrn: (recordToStore?.ownerUrn as string) || urn,
         };
 
         return createEvent(event);

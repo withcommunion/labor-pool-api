@@ -96,6 +96,16 @@ export async function getUserById(id: string) {
   }
 }
 
+export async function batchGetUserByIds(ids: string[]) {
+  try {
+    const users = await User.batchGet(ids);
+    return users;
+  } catch (error) {
+    console.log('Failed to batchGetUserByIds', error);
+    return null;
+  }
+}
+
 export async function getAllUsers() {
   try {
     const allUsers = await User.scan().exec();

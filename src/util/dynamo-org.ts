@@ -124,6 +124,16 @@ export async function getOrgById(id: string) {
   }
 }
 
+export async function batchGetOrgByIds(ids: string[]) {
+  try {
+    const orgs = await Org.batchGet(ids);
+    return orgs;
+  } catch (error) {
+    console.log('Failed to batchGetOrgByIds', error);
+    return null;
+  }
+}
+
 export async function getAllOrgs() {
   try {
     const allOrgs = await Org.scan().exec();

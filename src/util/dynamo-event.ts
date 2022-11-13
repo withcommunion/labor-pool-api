@@ -5,6 +5,8 @@
  */
 import * as dynamoose from 'dynamoose';
 import { Item } from 'dynamoose/dist/Item';
+import { IOrg } from './dynamo-org';
+import { IUser } from './dynamo-user';
 import { generateUrlFriendlyId } from './dynamo-util';
 
 // Strongly typed model
@@ -15,6 +17,10 @@ export interface Event {
   event: string;
   description: string;
   record: object;
+  ownerEntity?: {
+    user?: IUser;
+    org?: IOrg;
+  };
 }
 
 export interface IEvent extends Item, Event {

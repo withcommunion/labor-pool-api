@@ -1,10 +1,16 @@
 import type { APIGatewayProxyEventV2WithJWTAuthorizer } from 'aws-lambda';
-import { generateReturn } from '../util/api-util';
+import {
+  generateReturn,
+  parseIdFromUrn,
+  parseEntityTypeFromUrn,
+} from '../util/api-util';
 import logger, {
   setDefaultLoggerMetaForApi,
 } from '../util/winston-logger-util';
 
-import { getAllEvents } from 'src/util/dynamo-event';
+import { getAllEvents, Event } from 'src/util/dynamo-event';
+import { batchGetUserByIds, IUser } from 'src/util/dynamo-user';
+import { batchGetOrgByIds, IOrg } from 'src/util/dynamo-org';
 
 export const handler = async (
   event: APIGatewayProxyEventV2WithJWTAuthorizer
@@ -26,8 +32,9 @@ export const handler = async (
     const orgId = event.pathParameters?.id || '';
 
     logger.verbose('Fetching all events', { values: { orgId } });
-    const allEvents = await getAllEvents();
+    const allEvents = (await getAllEvents()) as Event[];
     logger.info('Received events', { values: { allEvents } });
+
     /**
      * TODO:
      * We obviously want to put safeguards here
@@ -42,7 +49,47 @@ export const handler = async (
       return generateReturn(404, { message: 'Events not found', orgId });
     }
 
-    const returnValue = generateReturn(200, allEvents);
+    const ownerUrnsInAllEvents = allEvents.map((event) => event.ownerUrn);
+
+    const userIdsInEvents = ownerUrnsInAllEvents
+      .filter((ownerUrn) => parseEntityTypeFromUrn(ownerUrn) === 'user')
+      .map((ownerUrn) => parseIdFromUrn(ownerUrn))
+      .reduce((acc, curr) => {
+        if (!acc.includes(curr)) {
+          return [...acc, curr];
+        } else {
+          return acc;
+        }
+      }, [] as string[]);
+
+    const orgIdsInEvents = ownerUrnsInAllEvents
+      .filter((ownerUrn) => parseEntityTypeFromUrn(ownerUrn) === 'org')
+      .map((ownerUrn) => parseIdFromUrn(ownerUrn))
+      .reduce((acc, curr) => {
+        if (!acc.includes(curr)) {
+          return [...acc, curr];
+        } else {
+          return acc;
+        }
+      }, [] as string[]);
+
+    const allUsersInEvents = await batchGetUserByIds(userIdsInEvents);
+    const allOrgsInEvents = await batchGetOrgByIds(orgIdsInEvents);
+
+    const urnToEntityMap = {} as Record<string, { org?: IOrg; user?: IUser }>;
+    allUsersInEvents?.forEach((user) => {
+      urnToEntityMap[`urn:user:${user.id}`] = { user };
+    });
+    allOrgsInEvents?.forEach((org) => {
+      urnToEntityMap[`urn:org:${org.id}`] = { org };
+    });
+
+    const eventsWithOwnerEntity = allEvents.map((event) => {
+      const ownerEntity = urnToEntityMap[event.ownerUrn];
+      return { ...event, ownerEntity };
+    });
+
+    const returnValue = generateReturn(200, eventsWithOwnerEntity);
     logger.info('Returning', { values: returnValue });
 
     return returnValue;

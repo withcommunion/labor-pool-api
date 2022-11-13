@@ -27,12 +27,17 @@ export function parseIdFromUrn(urn: string): string {
 }
 
 export function parseEntityTypeFromUrn(urn: string): 'user' | 'org' {
-  const entityType = urn.split(':')[1];
-  if (entityType === 'user') {
-    return 'user';
-  } else if (entityType === 'org') {
-    return 'org';
-  } else {
-    throw new Error('Invalid entity type passed to parseEntityTypeFromUrn');
+  try {
+    const entityType = urn.split(':')[1];
+    if (entityType === 'user') {
+      return 'user';
+    } else if (entityType === 'org') {
+      return 'org';
+    } else {
+      throw new Error('Invalid entity type passed to parseEntityTypeFromUrn');
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 }
