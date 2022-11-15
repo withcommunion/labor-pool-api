@@ -1,5 +1,9 @@
 import type { APIGatewayProxyEventV2WithJWTAuthorizer } from 'aws-lambda';
-import { generateReturn } from '../util/api-util';
+import {
+  generateReturn,
+  parseEntityTypeFromUrn,
+  parseIdFromUrn,
+} from '../util/api-util';
 import logger, {
   setDefaultLoggerMetaForApi,
 } from '../util/winston-logger-util';
@@ -9,6 +13,9 @@ import {
   ShiftApplication,
 } from '../util/dynamo-shift-application';
 import { getShiftById } from 'src/util/dynamo-shift';
+import { getUserById, IUser } from 'src/util/dynamo-user';
+import { getOrgById, IOrg } from 'src/util/dynamo-org';
+import { sendSms } from 'src/util/twilio-util';
 
 interface ExpectedPostBody {
   ownerUrn: string;
@@ -83,6 +90,8 @@ export const handler = async (
     }
     logger.info('Created ShiftApplication', { values: { savedApplication } });
 
+    await notifyUserHelper(savedApplication.toJSON() as ShiftApplication);
+
     const returnValue = generateReturn(200, {
       ...savedApplication,
     });
@@ -126,4 +135,60 @@ function parseBody(bodyString: string) {
     console.log('Failed to parse body', error);
     return null;
   }
+}
+
+async function notifyUserHelper(shiftApplication: ShiftApplication) {
+  const applicantOwnerType = parseEntityTypeFromUrn(shiftApplication.ownerUrn);
+  const applicantOwnerId = parseIdFromUrn(shiftApplication.ownerUrn);
+
+  const applicantEntity =
+    applicantOwnerType === 'user'
+      ? await getUserById(applicantOwnerId)
+      : await getOrgById(applicantOwnerId);
+  if (!applicantEntity) {
+    return;
+  }
+
+  const applicantName =
+    applicantOwnerType === 'user'
+      ? `${(applicantEntity as IUser).firstName} ${
+          (applicantEntity as IUser).lastName
+        }`
+      : (applicantEntity as IOrg).name;
+  const applicantUrl =
+    applicantOwnerType === 'user'
+      ? `https://www.communion.nyc/user/${applicantEntity?.id}`
+      : `https://www.communion.nyc/org/${applicantEntity?.id}`;
+
+  const shift = await getShiftById(shiftApplication.shiftId);
+  if (!shift) {
+    return;
+  }
+
+  const shiftOwnerType = parseEntityTypeFromUrn(shift?.ownerUrn || '');
+  const shiftOwnerId = parseIdFromUrn(shift?.ownerUrn || '');
+  const shiftOwnerEntity =
+    shiftOwnerType === 'user'
+      ? await getUserById(shiftOwnerId)
+      : await getOrgById(shiftOwnerId);
+  if (!shiftOwnerEntity) {
+    return;
+  }
+
+  const shiftOwnerName =
+    shiftOwnerType === 'user'
+      ? `${(shiftOwnerEntity as IUser).firstName}`
+      : (shiftOwnerEntity as IOrg).name;
+
+  const message = `Hey ${shiftOwnerName}, you have a new application for your shift!
+Here are the details:
+  - Shift name: ${shift?.name || ''}
+
+  - Applicant name: ${applicantName}
+  - Applicant description: ${shiftApplication.description}
+
+Visit ${applicantUrl} to find the applicants contact info and reach out directly if you have any questions.
+      `;
+
+  await sendSms(shiftOwnerEntity.phoneNumber, message);
 }
