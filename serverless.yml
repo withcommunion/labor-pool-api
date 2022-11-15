@@ -69,6 +69,7 @@ provider:
   environment:
     STAGE: ${sls:stage}
     LOG_LEVEL: verbose
+    TWILIO_API_KEY: ${ssm:/twilio_api_key}
 
 plugins:
   - serverless-bundle
