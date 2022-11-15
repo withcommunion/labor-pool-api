@@ -1,5 +1,9 @@
 import type { APIGatewayProxyEventV2WithJWTAuthorizer } from 'aws-lambda';
-import { generateReturn } from '../util/api-util';
+import {
+  generateReturn,
+  parseEntityTypeFromUrn,
+  parseIdFromUrn,
+} from '../util/api-util';
 import logger, {
   setDefaultLoggerMetaForApi,
 } from '../util/winston-logger-util';
@@ -7,8 +11,13 @@ import logger, {
 import {
   updateApplicationStatus,
   getApplicationById,
+  ShiftApplication,
 } from '../util/dynamo-shift-application';
 import { applyUserToShift, getShiftById } from 'src/util/dynamo-shift';
+import { getUserById, IUser } from 'src/util/dynamo-user';
+import { sendSms } from 'src/util/twilio-util';
+import { getOrgById, IOrg } from 'src/util/dynamo-org';
+// import { format } from 'date-fns-tz';
 
 interface ExpectedPatchBody {
   status: 'accepted' | 'rejected';
@@ -161,6 +170,8 @@ export const handler = async (
       }
     }
 
+    await notifyUserHelper(shiftApplication, applicationStatus);
+
     const returnValue = generateReturn(200, {
       ...updatedApplication,
     });
@@ -199,5 +210,67 @@ function parseBody(bodyString: string) {
     });
     console.log('Failed to parse body', error);
     return null;
+  }
+}
+
+async function notifyUserHelper(
+  shiftApplication: ShiftApplication,
+  status: 'accepted' | 'rejected'
+) {
+  const applicationOwner = parseEntityTypeFromUrn(shiftApplication.ownerUrn);
+  const ownerId = parseIdFromUrn(shiftApplication.ownerUrn);
+
+  const shift = await getShiftById(shiftApplication.shiftId);
+  const shiftOwnerType = parseEntityTypeFromUrn(shift?.ownerUrn || '');
+  const shiftOwner =
+    shiftOwnerType === 'user'
+      ? ((await getUserById(parseIdFromUrn(shift?.ownerUrn || ''))) as IUser)
+      : ((await getOrgById(parseIdFromUrn(shift?.ownerUrn || ''))) as IOrg);
+
+  if (!shift || !shiftOwner) {
+    return;
+  }
+
+  const hostName =
+    shiftOwnerType === 'user'
+      ? `${(shiftOwner as IUser).firstName} ${(shiftOwner as IUser).lastName}`
+      : (shiftOwner as IOrg).name;
+
+  const hostUrl =
+    shiftOwnerType === 'user'
+      ? `https://www.communion.nyc/user/${shiftOwner.id}`
+      : `https://www.communion.nyc/org/${shiftOwner.id}`;
+
+  const message =
+    status === 'accepted'
+      ? `Hi, you've been confirmed for an opening!  
+Here are the details:
+  - Opening Name: ${shift?.name}
+  - Opening Description: ${shift?.description}
+  - Host: ${hostName}
+  - Location: ${shift?.location}
+  - Details: ${shift.description})}
+  
+  Visit ${hostUrl} to find the hosts contact info and reach out directly if you have any questions.`
+      : `You are no longer needed for an opening.  
+Visit ${hostUrl} to find the hosts contact info and reach out directly if you have any questions.`;
+
+  /**
+ * TODO - It's formatting in UTC....so annoying
+ *   - Start Time: ${format(shift?.startTimeMs, 'MM/dd/yyyy hh:mm a', {
+    timeZone: 'America/New_York',
+  })}
+ */
+
+  if (applicationOwner === 'user') {
+    const user = await getUserById(ownerId);
+    if (user && shift) {
+      await sendSms(user.phoneNumber, message);
+    }
+  } else if (applicationOwner === 'org') {
+    const appliedOrg = await getOrgById(ownerId);
+    if (appliedOrg && shift) {
+      await sendSms(appliedOrg.phoneNumber, message);
+    }
   }
 }
